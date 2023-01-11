@@ -1,0 +1,10 @@
+tls:
+  certificates:
+    - certFile: "/etc/certs/STAR_csdev_roguesystems_co_bw.crt"
+      keyFile: "/etc/certs/STAR_csdev_roguesystems_co_bw.key"
+    - certFile: "/etc/certs/roguez.crt"
+      keyFile: "/etc/certs/roguez.key"
+    - certFile: "/etc/certs/localhost.crt"
+      keyFile: "/etc/certs/localhost.key"
+    - certFile: "/etc/certs/csdev.roguesystems.co.bw.crt"
+      keyFile: "/etc/certs/csdev.roguesystems.co.bw.key"

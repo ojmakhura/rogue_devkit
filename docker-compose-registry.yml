@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+  registry: 
+    image: registry:2
+    volumes:
+      - ${ROGUE_ERP_DATA}/registry/data:/var/lib/registry
+      - ${ROGUE_ERP_DATA}/registry/certs:${ROGUE_ERP_DATA}/registry/certs
+      - ${ROGUE_ERP_DATA}/auth:${ROGUE_ERP_DATA}/registry/auth
+    environment:
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_PATH: ${ROGUE_ERP_DATA}/registry/auth/system_passwd
+      REGISTRY_AUTH_HTPASSWD_REALM: registry-realm
+    networks:
+      rogueerp-public:
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogueerp_registry == true
+      labels:
+        - "traefik.enable=true"
+        - traefik.docker.network=rogueerp-public
+        - traefik.constraint-label=rogueerp-public
+        - "traefik.http.routers.registry.entrypoints=${ACTIVE_ROUTER_ENTRY}"
+        - "traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)"
+        - "traefik.http.routers.registry.tls=${SSL_SECURE}"
+        - "traefik.http.routers.registry.tls.certresolver=le"
+        - "traefik.http.services.registry.loadbalancer.server.port=5000"
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogueerp-public:
+    external: true
+
