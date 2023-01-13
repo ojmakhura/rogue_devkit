@@ -1,7 +1,7 @@
 include ./Makefile.dev
 
 gen_self_certs:
-	chmod 755 .env && . ./.env && sudo rm ${ROGUE_ERP_DATA}/traefik/${DOMAIN}.crt && chmod 755 .env && . ./.env && sudo rm ${ROGUE_ERP_DATA}/traefik/${DOMAIN}.key && chmod 755 .env && . ./.env && sudo openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -out ${ROGUE_ERP_DATA}/traefik/${DOMAIN}.crt -keyout ${ROGUE_ERP_DATA}/traefik/${DOMAIN}.key
+	chmod 755 .env && . ./.env && sudo rm ${ROGUE_DATA}/traefik/${DOMAIN}.crt && chmod 755 .env && . ./.env && sudo rm ${ROGUE_DATA}/traefik/${DOMAIN}.key && chmod 755 .env && . ./.env && sudo openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -out ${ROGUE_DATA}/traefik/${DOMAIN}.crt -keyout ${ROGUE_DATA}/traefik/${DOMAIN}.key
 
 
 ##
@@ -39,26 +39,28 @@ build_image: gen_env
 ##
 ## System initialisation
 ##
-swarm_label_true:
+swarm_label_true: gen_env
 	chmod 755 .env && . ./.env && docker node update --label-add ${STACK_NAME}_${node_label}=true ${node}
 
 swarm_init:
 	docker swarm init
 
-rogueerp_network:
-	docker network create --driver overlay rogueerp-public
+rogue_network:
+	docker network create --driver overlay rogue-public
 
 mount_prep: gen_env
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA} && \
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA}/db && \
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA}/auth && \
-	chmod 755 .env && . ./.env && cp deployment/traefik_passwd ${ROGUE_ERP_DATA}/auth/system_passwd && \
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA}/keycloak && \
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA}/certs && \
-	chmod 755 .env && . ./.env && cp deployment/certs/* ${ROGUE_ERP_DATA}/certs && \
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA}/registry && \
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_ERP_DATA}/traefik && \
-	chmod 755 .env && . ./.env && cp deployment/traefik/config.yml ${ROGUE_ERP_DATA}/traefik
+	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_DATA} && \
+	mkdir -p ${ROGUE_DATA}/db && \
+	mkdir -p ${ROGUE_DATA}/auth && \
+	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \
+	mkdir -p ${ROGUE_DATA}/keycloak && \
+	mkdir -p ${ROGUE_DATA}/certs && \
+	cp deployment/certs/* ${ROGUE_DATA}/certs && \
+	mkdir -p ${ROGUE_DATA}/registry && \
+	mkdir -p ${ROGUE_DATA}/traefik && \
+	deployment/traefik/config.yml ${ROGUE_DATA}/traefik \
+	mkdir -p ${ROGUE_DATA}/openkm/repository && \
+	cp deployment/openkm/* ${ROGUE_DATA}/openkm && \
 
 ##
 ## Environment management

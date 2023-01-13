@@ -5,13 +5,13 @@ services:
   ###############################################################################
   proxy:
     image: traefik:2.8
-    container_name: bocra-proxy
+    container_name: rogue-proxy
     hostname: traefik
     restart: unless-stopped
     networks:
-      bocra-network:
+      rogue-network:
         ipv4_address: ${BOCRA_PROXY_ADDRESS}
-      traefik-public:
+      rogue-public:
       default:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -43,7 +43,7 @@ services:
       - "--ping.entrypoint=ping"
       - "--metrics"
       - "--metrics.prometheus"
-      - "--providers.docker.network=traefik-public"
+      - "--providers.docker.network=rogue-public"
       - "--providers.docker"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
@@ -61,7 +61,7 @@ services:
       - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
       - "traefik.http.routers.https-redirect.middlewares=https-redirect"
-      - "traefik.http.routers.dashboard.rule=Host(`dashboard.bocra.localhost`)"
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.rogue.localhost`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=dashboard@internal"
       - "traefik.http.routers.dashboard.tls=true"
@@ -72,7 +72,7 @@ services:
   ###############################################################################
   registry:
     image: registry:2
-    container_name: bocra-registry
+    container_name: rogue-registry
     ports:
       - 5000:5000
     depends_on:
@@ -88,41 +88,41 @@ services:
 
       REGISTRY_HTTP_TLS_CERTIFICATE: /certs/localhost.crt
       REGISTRY_HTTP_TLS_KEY: /certs/localhost.key
-      REGISTRY_AUTH_TOKEN_REALM: https://app.local/auth/realms/bocra-it/protocol/docker-v2/auth
-      REGISTRY_AUTH_TOKEN_SERVICE: bocra-registry
-      REGISTRY_AUTH_TOKEN_ISSUER: https://app.local/auth/realms/bocra-it
+      REGISTRY_AUTH_TOKEN_REALM: https://app.local/auth/realms/rogue-it/protocol/docker-v2/auth
+      REGISTRY_AUTH_TOKEN_SERVICE: rogue-registry
+      REGISTRY_AUTH_TOKEN_ISSUER: https://app.local/auth/realms/rogue-it
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/localhost_trust_chain.pem
     volumes:
       # - ${BOCRA_DATA}/registry/data:/var/lib/registry
-      - /bocra/registry/data:/var/lib/registry
+      - /rogue/registry/data:/var/lib/registry
       - /home/junior/programming/docker/keycloak-docker-compose-yaml/certs:/certs
     networks:
-      bocra-network:
-      traefik-public:
+      rogue-network:
+      rogue-public:
       default:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.bocra-registry.entrypoints=websecure"
-      # - "traefik.http.routers.bocra-registry.rule=Host(`${REGISTRY_DOMAIN}`)"
-      - "traefik.http.routers.bocra-registry.rule=Host(`registry.monitor.local`)"
-      - "traefik.http.routers.bocra-registry.tls=true"
+      - "traefik.http.routers.rogue-registry.entrypoints=websecure"
+      # - "traefik.http.routers.rogue-registry.rule=Host(`${REGISTRY_DOMAIN}`)"
+      - "traefik.http.routers.rogue-registry.rule=Host(`registry.monitor.local`)"
+      - "traefik.http.routers.rogue-registry.tls=true"
 
 
 ###############################################################################
 # Networks
 ###############################################################################
 networks:
-  traefik-public:
+  rogue-public:
     # Allow setting it to false for testing
     external: true
-  bocra-network:
-    name: bocra-network
+  rogue-network:
+    name: rogue-network
     driver: bridge
     external: false
     ipam:
       driver: default
       config:
         - subnet: 192.168.57.0/24
-  bocra-elk:
-    name: bocra-elk
+  rogue-elk:
+    name: rogue-elk
     driver: bridge

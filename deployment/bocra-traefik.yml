@@ -5,13 +5,13 @@ services:
   ###############################################################################
   proxy:
     image: traefik:2.8
-    container_name: bocra-proxy
+    container_name: rogue-proxy
     hostname: traefik
     restart: unless-stopped
     networks:
-      bocra-network:
+      rogue-network:
         ipv4_address: ${BOCRA_PROXY_ADDRESS}
-      traefik-public:
+      rogue-public:
       default:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -43,7 +43,7 @@ services:
       - "--ping.entrypoint=ping"
       - "--metrics"
       - "--metrics.prometheus"
-      - "--providers.docker.network=traefik-public"
+      - "--providers.docker.network=rogue-public"
       - "--providers.docker"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"

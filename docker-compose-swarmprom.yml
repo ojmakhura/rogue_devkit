@@ -4,7 +4,7 @@ networks:
   net:
     driver: overlay
     attachable: true
-  rogueerp-public:
+  rogue-public:
     external: true
 
 volumes:
@@ -62,7 +62,7 @@ services:
     networks:
       - default
       - net
-      - rogueerp-public
+      - rogue-public
     environment:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
@@ -89,12 +89,12 @@ services:
           memory: 64M
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogueerp-public
-        - traefik.constraint-label=rogueerp-public
-        - traefik.http.routers.swarmprom-grafana-http.rule=Host(`grafana.opqa.bocra.org.bw`)
+        - traefik.docker.network=rogue-public
+        - traefik.constraint-label=rogue-public
+        - traefik.http.routers.swarmprom-grafana-http.rule=Host(`grafana.roguesystems.co.bw`)
         - traefik.http.routers.swarmprom-grafana-http.entrypoints=${WEB_ENTRY}
         - traefik.http.routers.swarmprom-grafana-http.middlewares=https-redirect
-        - traefik.http.routers.swarmprom-grafana-https.rule=Host(`grafana.opqa.bocra.org.bw`)
+        - traefik.http.routers.swarmprom-grafana-https.rule=Host(`grafana.roguesystems.co.bw`)
         - traefik.http.routers.swarmprom-grafana-https.entrypoints=${WEBSECURE_ENTRY}
         - traefik.http.routers.swarmprom-grafana-https.tls=${SSL_SECURE}
         #- traefik.http.routers.swarmprom-grafana-https.tls.certresolver=le
@@ -105,7 +105,7 @@ services:
     networks:
       - default
       - net
-      - rogueerp-public
+      - rogue-public
     environment:
       - SLACK_URL=${SLACK_URL:-https://hooks.slack.com/services/TOKEN}
       - SLACK_CHANNEL=${SLACK_CHANNEL:-general}
@@ -115,7 +115,7 @@ services:
       - '--storage.path=/alertmanager'
     volumes:
       - alertmanager:/alertmanager
-        - ${ROGUE_ERP_DATA}/auth/system_passwd:/var/system_passwd
+        - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
       # - ./swarmprom_passwwd:/swarmprom_passwwd
     deploy:
       mode: replicated
@@ -130,8 +130,8 @@ services:
           memory: 64M
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogueerp-public
-        - traefik.constraint-label=rogueerp-public
+        - traefik.docker.network=rogue-public
+        - traefik.constraint-label=rogue-public
         - traefik.http.routers.swarmprom-alertmanager-http.rule=Host(`alertmanager.${DOMAIN?Variable not set}`)
         - traefik.http.routers.swarmprom-alertmanager-http.entrypoints=${WEB_ENTRY}
         - traefik.http.routers.swarmprom-alertmanager-http.middlewares=https-redirect
@@ -148,9 +148,9 @@ services:
     networks:
       - default
       - net
-      - rogueerp-public
+      - rogue-public
     volumes:
-      - ${ROGUE_ERP_DATA}/auth/system_passwd:/var/system_passwd
+      - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
     environment:
       - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
     deploy:
@@ -158,8 +158,8 @@ services:
       replicas: 1
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogueerp-public
-        - traefik.constraint-label=rogueerp-public
+        - traefik.docker.network=rogue-public
+        - traefik.constraint-label=rogue-public
         - traefik.http.routers.swarmprom-unsee-http.rule=Host(`unsee.${DOMAIN?Variable not set}`)
         - traefik.http.routers.swarmprom-unsee-http.entrypoints=${WEB_ENTRY}
         - traefik.http.routers.swarmprom-unsee-http.middlewares=https-redirect
@@ -201,14 +201,14 @@ services:
     networks:
       - default
       - net
-      - rogueerp-public
+      - rogue-public
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
       - '--storage.tsdb.retention=${PROMETHEUS_RETENTION:-24h}'
     volumes:
       - prometheus:/prometheus
-      - ${ROGUE_ERP_DATA}/auth/system_passwd:/var/system_passwd
+      - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
     configs:
       - source: node_rules
         target: /etc/prometheus/swarm_node.rules.yml
@@ -227,8 +227,8 @@ services:
           memory: 128M
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogueerp-public
-        - traefik.constraint-label=rogueerp-public
+        - traefik.docker.network=rogue-public
+        - traefik.constraint-label=rogue-public
         - traefik.http.routers.swarmprom-prometheus-http.rule=Host(`prometheus.${DOMAIN?Variable not set}`)
         - traefik.http.routers.swarmprom-prometheus-http.entrypoints=${WEB_ENTRY}
         - traefik.http.routers.swarmprom-prometheus-http.middlewares=https-redirect
