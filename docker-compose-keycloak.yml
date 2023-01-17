@@ -41,13 +41,16 @@ services:
           - node.labels.rogue_keycloak == true
       labels:
         - "traefik.enable=true"
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.keycloak-http.rule=Host(`${KEYCLOAK_DOMAIN}`)"
+        - "traefik.http.routers.keycloak-http.entrypoints=web"
+        - "traefik.http.routers.keycloak-http.middlewares=https-redirect"
         - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
-        - "traefik.http.routers.keycloak.entrypoints=${ACTIVE_ROUTER_ENTRY}"
-        - "traefik.http.routers.keycloak.rule=Host(`${KEYCLOAK_DOMAIN}`)"
-        - "traefik.http.routers.keycloak.tls=${SSL_SECURE}"
-        - "traefik.http.routers.keycloak.tls.certresolver=le"
+        - "traefik.http.routers.keycloak-https.entrypoints=websecure"
+        - "traefik.http.routers.keycloak-https.rule=Host(`${KEYCLOAK_DOMAIN}`)"
+        - "traefik.http.routers.keycloak-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.keycloak-https.tls.certresolver=le"
 
 ###############################################################################
 # Networks

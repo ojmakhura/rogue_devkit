@@ -21,12 +21,15 @@ services:
           - node.labels.rogue_registry == true
       labels:
         - "traefik.enable=true"
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
-        - "traefik.http.routers.registry.entrypoints=${ACTIVE_ROUTER_ENTRY}"
-        - "traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)"
-        - "traefik.http.routers.registry.tls=${SSL_SECURE}"
-        - "traefik.http.routers.registry.tls.certresolver=le"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.registry-http.rule=Host(`${REGISTRY_DOMAIN}`)"
+        - "traefik.http.routers.registry-http.entrypoints=${WEB_ENTRY}"
+        - "traefik.http.routers.registry-http.middlewares=https-redirect"
+        - "traefik.http.routers.registry-https.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.registry-https.rule=Host(`${REGISTRY_DOMAIN}`)"
+        - "traefik.http.routers.registry-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.registry-https.tls.certresolver=le"
         - "traefik.http.services.registry.loadbalancer.server.port=5000"
 ###############################################################################
 # Networks

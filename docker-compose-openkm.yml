@@ -28,13 +28,16 @@ services:
           - node.labels.rogue_openkm == true
       labels:
         - "traefik.enable=true"
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.openkm-http.rule=Host(`${OPENKM_DOMAIN}`)"
+        - "traefik.http.routers.openkm-http.entrypoints=web"
+        - "traefik.http.routers.openkm-http.middlewares=https-redirect"
         - "traefik.http.services.openkm.loadbalancer.server.port=8080"
-        - "traefik.http.routers.openkm.entrypoints=${ACTIVE_ROUTER_ENTRY}"
-        - "traefik.http.routers.openkm.rule=Host(`${OPENKM_DOMAIN}`)"
-        - "traefik.http.routers.openkm.tls=${SSL_SECURE}"
-        - "traefik.http.routers.openkm.tls.certresolver=le"
+        - "traefik.http.routers.openkm-https.entrypoints=${ACTIVE_ROUTER_ENTRY}"
+        - "traefik.http.routers.openkm-https.rule=Host(`${OPENKM_DOMAIN}`)"
+        - "traefik.http.routers.openkm-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.openkm-https.tls.certresolver=le"
 
 ###############################################################################
 # Networks

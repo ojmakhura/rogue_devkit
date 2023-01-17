@@ -32,20 +32,21 @@ services:
           - node.labels.rogue_db == true
       labels:
         - "traefik.enable=true"
-        - "traefik.tcp.routers.roguedb.entrypoints=postgres"
-        - "traefik.tcp.routers.roguedb.rule=HostSNI(`${DB_DOMAIN}`)"
-        - "traefik.tcp.routers.roguedb.tls=true"
-        - "traefik.tcp.routers.roguedb.service=roguedb"
-        - "traefik.tcp.routers.roguedb.tls.certresolver=le"
-        - "traefik.tcp.services.roguedb.loadBalancer.server.port=5432"
         - "traefik.docker.network=rogue-public"
         - "traefik.constraint-label=rogue-public"
-        #- "traefik.http.routers.rogue-db.entrypoints=${ACTIVE_ROUTER_ENTRY}"
-        #- "traefik.http.routers.roguedb.entrypoints=postgres"
-        #- "traefik.http.routers.roguedb.rule=Host(`${DB_DOMAIN}`)"
-        #- "traefik.http.routers.roguedb.tls=${SSL_SECURE}"
-        #- "traefik.http.routers.roguedb.tls.certresolver=le"
-        #- "traefik.http.services.roguedb.loadbalancer.server.port=5432"
+        - "traefik.http.routers.rogue-db-http.rule=Host(`${DB_DOMAIN}`)"
+        - "traefik.http.routers.rogue-db-http.entrypoints=web"
+        - "traefik.http.routers.rogue-db-http.middlewares=https-redirect"
+        - "traefik.http.routers.rogue-db-https.entrypoints=websecure"
+        - "traefik.http.routers.rogue-db-https.rule=Host(`${DB_DOMAIN}`)"
+        - "traefik.http.routers.rogue-db-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.rogue-db-https.tls.certresolver=le"
+        - "traefik.http.services.rogue-db.loadbalancer.server.port=5432"
+        - "traefik.tcp.routers.rogue-db-postgres.entrypoints=postgres"
+        - "traefik.tcp.routers.rogue-db-postgres.rule=HostSNI(`${DB_DOMAIN}`)"
+        - "traefik.tcp.routers.rogue-db-postgres.tls=${SSL_SECURE}"
+        - "traefik.tcp.routers.rogue-db-postgres.tls.certresolver=le"
+        - "traefik.tcp.services.rogue-db.loadbalancer.server.port=5432"
 
   ###############################################################################
   # Postgres administration frontend
@@ -75,11 +76,14 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=rogue-public"
         - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.rogue-pgadmin-http.rule=Host(`${DB_DOMAIN}`) && PathPrefix(`/pgadmin`)"
+        - "traefik.http.routers.rogue-pgadmin-http.entrypoints=web"
+        - "traefik.http.routers.rogue-pgadmin-http.middlewares=https-redirect"
         - "traefik.http.services.rogue-pgadmin.loadbalancer.server.port=80"
-        - "traefik.http.routers.rogue-pgadmin.entrypoints=${ACTIVE_ROUTER_ENTRY}"
-        - "traefik.http.routers.rogue-pgadmin.rule=Host(`${DB_DOMAIN}`) && PathPrefix(`/pgadmin`)"
-        - "traefik.http.routers.rogue-pgadmin.tls=${SSL_SECURE}"
-        - "traefik.http.routers.rogue-pgadmin.tls.certresolver=le"
+        - "traefik.http.routers.rogue-pgadmin-https.entrypoints=websecure"
+        - "traefik.http.routers.rogue-pgadmin-https.rule=Host(`${DB_DOMAIN}`) && PathPrefix(`/pgadmin`)"
+        - "traefik.http.routers.rogue-pgadmin-https.tls=true"
+        - "traefik.http.routers.rogue-pgadmin-https.tls.certresolver=le"
 
 ###############################################################################
 # Networks
