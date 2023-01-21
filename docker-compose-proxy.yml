@@ -9,8 +9,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
       # - ${ROGUE_DATA}/certs:/etc/certs
-      - ./deployment/certs:/etc/certs
-      - ./deployment/traefik/config.yml:/etc/traefik/dynamic_conf/conf.yml:ro
+      # - ./deployment/certs:/etc/certs
+      # - ./deployment/traefik/config.yml:/etc/traefik/dynamic_conf/conf.yml:ro
     ports:
       - 80:80
       - 443:443
@@ -38,7 +38,7 @@ services:
       # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
       - --certificatesresolvers.le.acme.email=${ACME_EMAIL?Variable not set}
       # Store the Let's Encrypt certificates in the mounted volume
-      # - --certificatesresolvers.le.acme.storage=/etc/certs/acme.json
+      - --certificatesresolvers.le.acme.storage=/etc/certs/acme.json
       # Use the TLS Challenge for Let's Encrypt
       - --certificatesresolvers.le.acme.tlschallenge=true
       # Enable the access log, with HTTP requests
@@ -54,8 +54,8 @@ services:
       - "--ping=true"
       - "--ping.entrypoint=ping"
       #ssl configuration
-      - --providers.file.directory=/etc/traefik/dynamic_conf
-      - --providers.file.watch=true
+      # - --providers.file.directory=/etc/traefik/dynamic_conf
+      # - --providers.file.watch=true
 
     deploy:
       placement:

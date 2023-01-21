@@ -39,19 +39,19 @@ services:
           #- node.labels.prim1 == true
           - node.labels.rogue_portainer == true
       labels:
-        - traefik.enable=true
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
         - "traefik.http.routers.portainer-http.rule=Host(`${PORTAINER_DOMAIN}`)"
         - "traefik.http.routers.portainer-http.entrypoints=web"
         - "traefik.http.routers.portainer-http.middlewares=https-redirect"
-        - traefik.http.routers.portainer-https.rule=Host(`${PORTAINER_DOMAIN}`)
-        - traefik.http.routers.portainer-https.entrypoints=${ACTIVE_ROUTER_ENTRY}
-        - traefik.http.routers.portainer-https.tls=${SSL_SECURE}
-        - traefik.http.routers.portainer-https.tls.certresolver=le
-        - traefik.backend.loadbalancer.swarm=true
-        - traefik.backend.loadbalancer.stickiness=true
-        - traefik.http.services.portainer.loadbalancer.server.port=9000
+        - "traefik.http.routers.portainer-https.rule=Host(`${PORTAINER_DOMAIN}`)"
+        - "traefik.http.routers.portainer-https.entrypoints=${ACTIVE_ROUTER_ENTRY}"
+        - "traefik.http.routers.portainer-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.portainer-https.tls.certresolver=le"
+        - "traefik.backend.loadbalancer.swarm=true"
+        - "traefik.backend.loadbalancer.stickiness=true"
+        - "traefik.http.services.portainer.loadbalancer.server.port=9000"
 
 ###############################################################################
 # Networks
