@@ -6,8 +6,6 @@ services:
   mssql:
     image: mcr.microsoft.com/mssql/rhel/server:2019-latest
     hostname: mssql
-    #volumes:
-    #  - ${BOCRA_DATA}/hosts:/etc/hosts
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=RxH4uloM!

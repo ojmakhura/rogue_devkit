@@ -43,7 +43,7 @@ services:
       - "--ping.entrypoint=ping"
       - "--metrics"
       - "--metrics.prometheus"
-      - "--providers.docker.network=bocraportal-public"
+      - "--providers.docker.network=rogue-public"
       
     deploy:
       placement:

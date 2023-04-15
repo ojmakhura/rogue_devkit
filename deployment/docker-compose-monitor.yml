@@ -10,12 +10,11 @@ services:
     restart: unless-stopped
     networks:
       rogue-network:
-        ipv4_address: ${BOCRA_PROXY_ADDRESS}
       rogue-public:
       default:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${BOCRA_DATA}/traefik/acme.json:${BOCRA_DATA}/traefik/acme.json
+      - ${ROGUE_DATA}/traefik/acme.json:${ROGUE_DATA}/traefik/acme.json
       - ./traefik/config.yml:/etc/traefik/dynamic_conf/conf.yml:ro
     ports:
       - "443:443"
@@ -48,7 +47,7 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--certificatesresolvers.le.acme.email=${ACME_EMAIL?Variable not set}"
-      - "--certificatesresolvers.le.acme.storage=${BOCRA_DATA}/traefik/acme.json"
+      - "--certificatesresolvers.le.acme.storage=${ROGUE_DATA}/traefik/acme.json"
       - "--certificatesresolvers.le.acme.tlschallenge=true"
 
     labels:
@@ -93,7 +92,6 @@ services:
       REGISTRY_AUTH_TOKEN_ISSUER: https://app.local/auth/realms/rogue-it
       REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE: /certs/localhost_trust_chain.pem
     volumes:
-      # - ${BOCRA_DATA}/registry/data:/var/lib/registry
       - /rogue/registry/data:/var/lib/registry
       - /home/junior/programming/docker/keycloak-docker-compose-yaml/certs:/certs
     networks:
