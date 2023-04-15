@@ -1,5 +1,5 @@
 TEST_DOMAIN=roguesystems.co.bw
-LOCAL_DOMAIN=localhost
+LOCAL_DOMAIN=roguedev.local
 DEV_DOMAIN=test.roguesystems.co.bw
 LIVE_DOMAIN=roguesystems.co.bw
 STACK_NAME=rogue

@@ -50,6 +50,10 @@ rogue_network:
 
 mount_prep: gen_env
 	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_DATA} && \
+	echo "127.0.0.1	localhost" && \
+	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') ${LOCAL_DOMAIN} ${DB_DOMAIN} ${REGISTRY_DOMAIN} ${RABBITMQ_HOST} ${KEYCLOAK_DOMAIN} ${API_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
+	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') portainer.${LOCAL_DOMAIN} grafana.${LOCAL_DOMAIN} swarmprom.${LOCAL_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
+	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') unsee.${LOCAL_DOMAIN} alertmanager.${LOCAL_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
 	mkdir -p ${ROGUE_DATA}/db && \
 	mkdir -p ${ROGUE_DATA}/auth && \
 	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \

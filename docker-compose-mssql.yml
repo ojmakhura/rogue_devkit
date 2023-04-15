@@ -1,0 +1,40 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # MS SQL 2019 Server
+  ###############################################################################
+  mssql:
+    image: mcr.microsoft.com/mssql/rhel/server:2019-latest
+    hostname: mssql
+    #volumes:
+    #  - ${BOCRA_DATA}/hosts:/etc/hosts
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=RxH4uloM!
+      - TZ=Africa/Gaborone
+    networks:
+      rogue-public:
+      default:
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_mssql == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.tcp.routers.rogue-mssql.rule=HostSNI(`mssql.roguedev.local`)"
+        - "traefik.tcp.routers.rogue-mssql.entrypoints=mssql"
+        - "traefik.tcp.routers.rogue-mssql.service=rogue-mssql"
+        - "traefik.tcp.routers.rogue-mssql.tls=true"
+        - "traefik.tcp.routers.rogue-mssql.tls.passthrough=true"
+        - "traefik.tcp.services.rogue-mssql.loadbalancer.server.port=1433"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true
