@@ -76,5 +76,5 @@ gen_env:
 	if [ -f .env ]; then \
 		rm -f .env; \
 	fi
-	@$(${env}_ENV)
+	@$(ENV)
 	chmod 755 .env
