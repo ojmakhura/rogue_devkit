@@ -64,7 +64,7 @@ mount_prep: gen_env
 	mkdir -p ${ROGUE_DATA}/traefik && \
 	deployment/traefik/config.yml ${ROGUE_DATA}/traefik \
 	mkdir -p ${ROGUE_DATA}/openkm/repository && \
-	cp deployment/openkm/* ${ROGUE_DATA}/openkm && \
+	cp deployment/openkm/* ${ROGUE_DATA}/openkm
 
 ##
 ## Environment management
