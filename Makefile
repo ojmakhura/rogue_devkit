@@ -51,9 +51,9 @@ rogue_network:
 mount_prep: gen_env
 	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_DATA} && \
 	echo "127.0.0.1	localhost" && \
-	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') ${LOCAL_DOMAIN} ${DB_DOMAIN} ${REGISTRY_DOMAIN} ${RABBITMQ_HOST} ${KEYCLOAK_DOMAIN} ${API_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
-	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') portainer.${LOCAL_DOMAIN} grafana.${LOCAL_DOMAIN} swarmprom.${LOCAL_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
-	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') unsee.${LOCAL_DOMAIN} alertmanager.${LOCAL_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
+	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') ${DOMAIN} ${DB_DOMAIN} ${REGISTRY_DOMAIN} ${RABBITMQ_HOST} ${KEYCLOAK_DOMAIN} ${API_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
+	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') portainer.${DOMAIN} grafana.${DOMAIN} swarmprom.${DOMAIN}" >> ${ROGUE_DATA}/hosts && \
+	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') unsee.${DOMAIN} alertmanager.${DOMAIN}" >> ${ROGUE_DATA}/hosts && \
 	mkdir -p ${ROGUE_DATA}/db && \
 	mkdir -p ${ROGUE_DATA}/auth && \
 	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \
@@ -73,13 +73,8 @@ rm_env:
 	rm -f .env
 
 gen_env:
-ifdef env
 	if [ -f .env ]; then \
 		rm -f .env; \
 	fi
 	@$(${env}_ENV)
 	chmod 755 .env
-else
-	@echo 'no env defined. Please run again with `make env=<LOCAL_ENV, DEV_ENV, TEST_ENV, LIVE_ENV> target`'
-	exit 1
-endif
