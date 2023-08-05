@@ -4,17 +4,17 @@ services:
   # Keycloak authentication server
   ###############################################################################
   keycloak:
-    image: ${KEYCLOAK_REGISTRY_IMAGE}
+    image: quay.io/keycloak/keycloak:22.0.1
     hostname: keycloak
     command:
       - "start"
       - "--optimized"
-    healthcheck:
-     test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
-     interval: 5s
-     timeout: 5s
-     retries: 3
-     start_period: 15s
+    # healthcheck:
+    #  test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
+    #  interval: 5s
+    #  timeout: 5s
+    #  retries: 3
+    #  start_period: 15s
     build:
       context: .
       dockerfile: Dockerfile.keycloak

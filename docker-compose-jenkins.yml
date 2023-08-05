@@ -25,7 +25,7 @@ services:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.bocraportal_jenkins == true
+          - node.labels.rogue_jenkins == true
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.jenkins-http.rule=Host(`${JENKINS_DOMAIN}`)"
@@ -35,3 +35,10 @@ services:
         - "traefik.http.routers.jenkins.rule=Host(`${JENKINS_DOMAIN}`)"
         - "traefik.http.routers.jenkins.tls=${SSL_SECURE}"
         - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

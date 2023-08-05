@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Postgres database
+  ###############################################################################
+  oracle-db:
+    image: container-registry.oracle.com/database/free:latest
+    # volumes:
+      # - ${ROGUE_DATA}/oracle-db/oradata:/opt/oracle/oradata
+    environment:
+      ORACLE_PWD: ${POSTGRES_PASSWORD}
+      TZ: Africa/Gaborone
+    # healthcheck:
+    #   test: ["CMD", "/opt/bitnami/postgresql/bin/pg_isready", "--username=postgres"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 5
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_oracle_db == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.tcp.routers.rogue-oracle-db.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.rogue-oracle-db.entrypoints=oracle-db"
+        # - "traefik.tcp.routers.rogue-oracle-db.service=oracle-db"
+        # - "traefik.tcp.routers.rogue-db-postgres.tls.certresolver=le"
+        - "traefik.tcp.services.rogue-oracle-db.loadbalancer.server.port=1521"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

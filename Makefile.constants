@@ -5,8 +5,7 @@ ACME_EMAIL=admin@roguesystems.co.bw
 VERSION=0.0.1
 IMAGE_VERSION=${VERSION}
 
-ROGUE_DATA=/home/junior/rogue
-ROGUE_DATA=/rogue
+ROGUE_DATA=${DEV_DATA_PREFIX}/rogue
 SECURE_ROUTER_ENTRY=websecure
 INSECURE_ROUTER_ENTRY=web
 
