@@ -8,7 +8,7 @@ services:
     # volumes:
       # - ${ROGUE_DATA}/oracle-db/oradata:/opt/oracle/oradata
     environment:
-      ORACLE_PWD: ${POSTGRES_PASSWORD}
+      ORACLE_PWD: ${ORACLE_PASSWORD}
       TZ: Africa/Gaborone
     # healthcheck:
     #   test: ["CMD", "/opt/bitnami/postgresql/bin/pg_isready", "--username=postgres"]
