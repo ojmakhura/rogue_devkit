@@ -138,7 +138,7 @@ services:
     volumes:
       - alertmanager:/alertmanager
         # - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
-      # - ./swarmprom_passwwd:/swarmprom_passwwd
+      # - ./swarmprom_passwd:/swarmprom_passwd
     deploy:
       mode: replicated
       replicas: 1
@@ -162,8 +162,8 @@ services:
         - traefik.http.routers.swarmprom-alertmanager-https.tls=${SSL_SECURE}
         - traefik.http.routers.swarmprom-alertmanager-https.tls.certresolver=le
         - traefik.http.services.swarmprom-alertmanager.loadbalancer.server.port=9093
-        - traefik.http.middlewares.swarmprom-alertmanager-auth.basicauth.usersfile=/var/system_passwd
-        - traefik.http.routers.swarmprom-alertmanager-https.middlewares=swarmprom-alertmanager-auth
+        # - traefik.http.middlewares.swarmprom-alertmanager-auth.basicauth.usersfile=/var/system_passwd
+        # - traefik.http.routers.swarmprom-alertmanager-https.middlewares=swarmprom-alertmanager-auth
 
   unsee:
     image: cloudflare/unsee:v0.9.2
@@ -190,8 +190,8 @@ services:
         - traefik.http.routers.swarmprom-unsee-https.tls=${SSL_SECURE}
         - traefik.http.routers.swarmprom-unsee-https.tls.certresolver=le
         - traefik.http.services.swarmprom-unsee.loadbalancer.server.port=8080
-        - traefik.http.middlewares.swarmprom-unsee-auth.basicauth.usersfile=/var/system_passwd
-        - traefik.http.routers.swarmprom-unsee-https.middlewares=swarmprom-unsee-auth
+        # - traefik.http.middlewares.swarmprom-unsee-auth.basicauth.usersfile=/var/system_passwd
+        # - traefik.http.routers.swarmprom-unsee-https.middlewares=swarmprom-unsee-auth
 
   node-exporter:
     image: bitnami/node-exporter:1.6.0

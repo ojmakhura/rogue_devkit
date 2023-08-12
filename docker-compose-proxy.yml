@@ -16,6 +16,7 @@ services:
       - 5432:5432
       - 1521:1521
       - 3306:3306
+      - 1433:1433
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:8082/ping","--spider" ]
       interval: 10s
@@ -34,6 +35,7 @@ services:
       - "--entrypoints.mariadb.address=:3306"
       - "--entrypoints.postgres.address=:5432"
       - "--entrypoints.oracle-db.address=:1521"
+      - "--entrypoints.mssql.address=:1433"
       - "--entrypoints.registry.address=:5000"
       - "--entrypoints.rabbitmq.address=:5672"
       - "--entryPoints.ping.address=:8082"
