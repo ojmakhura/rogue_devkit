@@ -50,11 +50,7 @@ rogue_network:
 
 mount_prep: gen_env
 	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_DATA} && \
-	echo "127.0.0.1	localhost" && \
-	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') ${DOMAIN} ${DB_DOMAIN} ${REGISTRY_DOMAIN} ${RABBITMQ_HOST} ${KEYCLOAK_DOMAIN} ${API_DOMAIN}" >> ${ROGUE_DATA}/hosts && \
-	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') portainer.${DOMAIN} grafana.${DOMAIN} swarmprom.${DOMAIN}" >> ${ROGUE_DATA}/hosts && \
-	echo "$(ip route get 8.8.8.8 | awk -F"src " 'NR==1{split($2,a," ");print a[1]}') unsee.${DOMAIN} alertmanager.${DOMAIN}" >> ${ROGUE_DATA}/hosts && \
-	mkdir -p ${ROGUE_DATA}/db && \
+	mkdir -p ${ROGUE_DATA}/postgres && \
 	mkdir -p ${ROGUE_DATA}/auth && \
 	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \
 	mkdir -p ${ROGUE_DATA}/keycloak && \
@@ -64,6 +60,11 @@ mount_prep: gen_env
 	mkdir -p ${ROGUE_DATA}/traefik && \
 	deployment/traefik/config.yml ${ROGUE_DATA}/traefik \
 	mkdir -p ${ROGUE_DATA}/openkm/repository && \
+	mkdir -p ${ROGUE_DATA}/prometheus && \
+	mkdir -p ${ROGUE_DATA}/grafana && \
+	mkdir -p ${ROGUE_DATA}/caddy && \
+	mkdir -p ${ROGUE_DATA}/portainer && \
+	mkdir -p ${ROGUE_DATA}/jenkins && \
 	cp deployment/openkm/* ${ROGUE_DATA}/openkm
 
 ##
