@@ -59,13 +59,11 @@ mount_prep: gen_env
 	mkdir -p ${RIMS_DATA}/registry && \
 	mkdir -p ${RIMS_DATA}/traefik && \
 	deployment/traefik/config.yml ${RIMS_DATA}/traefik \
-	mkdir -p ${RIMS_DATA}/openkm/repository && \
 	mkdir -p ${RIMS_DATA}/prometheus && \
 	mkdir -p ${RIMS_DATA}/grafana && \
 	mkdir -p ${RIMS_DATA}/caddy && \
 	mkdir -p ${RIMS_DATA}/portainer && \
 	mkdir -p ${RIMS_DATA}/jenkins && \
-	cp deployment/openkm/* ${RIMS_DATA}/openkm
 
 ##
 ## Environment management
