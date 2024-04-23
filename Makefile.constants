@@ -1,6 +1,6 @@
 STACK_NAME=rims
 
-ACME_EMAIL=admin@rimssystems.co.bw
+ACME_EMAIL=omakhura@bitri.co.bw
 
 VERSION=0.0.1
 IMAGE_VERSION=${VERSION}
