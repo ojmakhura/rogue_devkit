@@ -4,7 +4,7 @@ services:
   # Keycloak authentication server
   ###############################################################################
   keycloak:
-    image: bitnami/keycloak:22.0.1
+    image: bitnami/keycloak:23.0.7
     hostname: keycloak
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health/ready"]
