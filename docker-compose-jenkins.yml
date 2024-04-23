@@ -14,10 +14,10 @@ services:
     depends_on:
       - proxy
     volumes:
-      - ${ROGUE_DATA}/jenkins:/var/jenkins_home
+      - ${RIMS_DATA}/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
-      rogue-public:
+      rims-public:
     deploy:
       mode: replicated
       replicas: 1
@@ -25,7 +25,7 @@ services:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.rogue_jenkins == true
+          - node.labels.rims_jenkins == true
       labels:
         - "traefik.enable=true"
         - "traefik.http.routers.jenkins-http.rule=Host(`${JENKINS_DOMAIN}`)"
@@ -40,5 +40,5 @@ services:
 # Networks
 ###############################################################################
 networks:
-  rogue-public:
+  rims-public:
     external: true

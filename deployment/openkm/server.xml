@@ -21,7 +21,7 @@
 
     <Resource name="jdbc/OpenKMDS" auth="Container" type="javax.sql.DataSource"
             maxTotal="100" maxIdle="30" maxWaitMillis="10000" validationQuery="select 1"
-            username="rogueadmin" password="Cash8Aes" driverClassName="org.postgresql.Driver"
+            username="rimsadmin" password="Cash8Aes" driverClassName="org.postgresql.Driver"
             url="jdbc:postgresql://db/okmdb"/>
 
     <Resource name="mail/OpenKM" auth="Container" type="javax.mail.Session"

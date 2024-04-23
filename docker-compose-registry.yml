@@ -3,26 +3,26 @@ services:
   registry: 
     image: registry:2
     volumes:
-      - ${ROGUE_DATA}/registry/data:/var/lib/registry
-      - ${ROGUE_DATA}/registry/certs:${ROGUE_DATA}/registry/certs
-      - ${ROGUE_DATA}/auth:${ROGUE_DATA}/registry/auth
+      - ${RIMS_DATA}/registry/data:/var/lib/registry
+      - ${RIMS_DATA}/registry/certs:${RIMS_DATA}/registry/certs
+      - ${RIMS_DATA}/auth:${RIMS_DATA}/registry/auth
     environment:
       REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
       REGISTRY_AUTH: htpasswd
-      REGISTRY_AUTH_HTPASSWD_PATH: ${ROGUE_DATA}/registry/auth/system_passwd
+      REGISTRY_AUTH_HTPASSWD_PATH: ${RIMS_DATA}/registry/auth/system_passwd
       REGISTRY_AUTH_HTPASSWD_REALM: registry-realm
     networks:
-      rogue-public:
+      rims-public:
     deploy:
       placement:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.rogue_registry == true
+          - node.labels.rims_registry == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
+        - "traefik.docker.network=rims-public"
+        - "traefik.constraint-label=rims-public"
         - "traefik.http.routers.registry-http.rule=Host(`${REGISTRY_DOMAIN}`)"
         - "traefik.http.routers.registry-http.entrypoints=${WEB_ENTRY}"
         - "traefik.http.routers.registry-http.middlewares=https-redirect"
@@ -35,6 +35,6 @@ services:
 # Networks
 ###############################################################################
 networks:
-  rogue-public:
+  rims-public:
     external: true
 

@@ -13,23 +13,23 @@ services:
     #  retries: 3
     #  start_period: 15s
     volumes:
-      - ${ROGUE_DATA}/openkm/server.xml:/opt/tomcat/conf/server.xml
-      - ${ROGUE_DATA}/openkm/OpenKM.cfg:/opt/tomcat/OpenKM.cfg
-      - ${ROGUE_DATA}/openkm/repository:/opt/tomcat/repository
+      - ${RIMS_DATA}/openkm/server.xml:/opt/tomcat/conf/server.xml
+      - ${RIMS_DATA}/openkm/OpenKM.cfg:/opt/tomcat/OpenKM.cfg
+      - ${RIMS_DATA}/openkm/repository:/opt/tomcat/repository
     environment:
       TZ: Africa/Gaborone
     networks:
-      rogue-public:
+      rims-public:
     deploy:
       placement:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.rogue_openkm == true
+          - node.labels.rims_openkm == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
+        - "traefik.docker.network=rims-public"
+        - "traefik.constraint-label=rims-public"
         - "traefik.http.routers.openkm-http.rule=Host(`${OPENKM_DOMAIN}`)"
         - "traefik.http.routers.openkm-http.entrypoints=web"
         - "traefik.http.routers.openkm-http.middlewares=https-redirect"
@@ -43,5 +43,5 @@ services:
 # Networks
 ###############################################################################
 networks:
-  rogue-public:
+  rims-public:
     external: true

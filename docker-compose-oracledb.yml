@@ -6,7 +6,7 @@ services:
   oracle-db:
     image: container-registry.oracle.com/database/free:latest
     # volumes:
-      # - ${ROGUE_DATA}/oracle-db/oradata:/opt/oracle/oradata
+      # - ${RIMS_DATA}/oracle-db/oradata:/opt/oracle/oradata
     environment:
       ORACLE_PWD: ${ORACLE_PASSWORD}
       TZ: Africa/Gaborone
@@ -16,26 +16,26 @@ services:
     #   timeout: 5s
     #   retries: 5
     networks:
-      rogue-public:
+      rims-public:
     deploy:
       placement:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.rogue_oracle_db == true
+          - node.labels.rims_oracle_db == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
-        - "traefik.tcp.routers.rogue-oracle-db.rule=HostSNI(`*`)"
-        - "traefik.tcp.routers.rogue-oracle-db.entrypoints=oracle-db"
-        # - "traefik.tcp.routers.rogue-oracle-db.service=oracle-db"
-        # - "traefik.tcp.routers.rogue-db-postgres.tls.certresolver=le"
-        - "traefik.tcp.services.rogue-oracle-db.loadbalancer.server.port=1521"
+        - "traefik.docker.network=rims-public"
+        - "traefik.constraint-label=rims-public"
+        - "traefik.tcp.routers.rims-oracle-db.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.rims-oracle-db.entrypoints=oracle-db"
+        # - "traefik.tcp.routers.rims-oracle-db.service=oracle-db"
+        # - "traefik.tcp.routers.rims-db-postgres.tls.certresolver=le"
+        - "traefik.tcp.services.rims-oracle-db.loadbalancer.server.port=1521"
 
 ###############################################################################
 # Networks
 ###############################################################################
 networks:
-  rogue-public:
+  rims-public:
     external: true

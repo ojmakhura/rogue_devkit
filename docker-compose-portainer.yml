@@ -13,7 +13,7 @@ services:
       - /var/lib/docker/volumes:/var/lib/docker/volumes
     networks:
       - agent-network
-      # - rogueswarm
+      # - rimsswarm
     deploy:
       mode: global
       placement:
@@ -26,22 +26,22 @@ services:
     image: portainer/portainer-ce:2.17.1-alpine
     command: -H tcp://tasks.agent:9001 --tlsskipverify
     volumes:
-      - ${ROGUE_DATA}/portainer:/data
+      - ${RIMS_DATA}/portainer:/data
     networks:
       - agent-network
-      - rogue-public
-      #- rogueswarm
+      - rims-public
+      #- rimsswarm
     deploy:
       mode: global
       placement:
         constraints:
           #- node.role == manager
           #- node.labels.prim1 == true
-          - node.labels.rogue_portainer == true
+          - node.labels.rims_portainer == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
+        - "traefik.docker.network=rims-public"
+        - "traefik.constraint-label=rims-public"
         - "traefik.http.routers.portainer-http.rule=Host(`${PORTAINER_DOMAIN}`)"
         - "traefik.http.routers.portainer-http.entrypoints=web"
         - "traefik.http.routers.portainer-http.middlewares=https-redirect"
@@ -60,5 +60,5 @@ services:
 networks:
   agent-network:
     attachable: true
-  rogue-public:
+  rims-public:
     external: true

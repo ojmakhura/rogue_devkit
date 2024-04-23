@@ -27,17 +27,17 @@ services:
       KEYCLOAK_ENABLE_HEALTH_ENDPOINTS: "true"
       TZ: Africa/Gaborone
     networks:
-      rogue-public:
+      rims-public:
     deploy:
       placement:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.rogue_keycloak == true
+          - node.labels.rims_keycloak == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
+        - "traefik.docker.network=rims-public"
+        - "traefik.constraint-label=rims-public"
         - "traefik.http.routers.keycloak-http.rule=Host(`${KEYCLOAK_DOMAIN}`)"
         - "traefik.http.routers.keycloak-http.entrypoints=web"
         - "traefik.http.routers.keycloak-http.middlewares=https-redirect"
@@ -51,5 +51,5 @@ services:
 # Networks
 ###############################################################################
 networks:
-  rogue-public:
+  rims-public:
     external: true

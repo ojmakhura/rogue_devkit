@@ -1,4 +1,4 @@
-# rogue_devkit
+# rims_devkit
 
 ## Network
 `make traefik_network`

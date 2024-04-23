@@ -1,7 +1,7 @@
 include ./Makefile.dev
 
 gen_self_certs:
-	chmod 755 .env && . ./.env && sudo rm ${ROGUE_DATA}/traefik/${DOMAIN}.crt && chmod 755 .env && . ./.env && sudo rm ${ROGUE_DATA}/traefik/${DOMAIN}.key && chmod 755 .env && . ./.env && sudo openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -out ${ROGUE_DATA}/traefik/${DOMAIN}.crt -keyout ${ROGUE_DATA}/traefik/${DOMAIN}.key
+	chmod 755 .env && . ./.env && sudo rm ${RIMS_DATA}/traefik/${DOMAIN}.crt && chmod 755 .env && . ./.env && sudo rm ${RIMS_DATA}/traefik/${DOMAIN}.key && chmod 755 .env && . ./.env && sudo openssl req -x509 -sha256 -days 356 -nodes -newkey rsa:2048 -out ${RIMS_DATA}/traefik/${DOMAIN}.crt -keyout ${RIMS_DATA}/traefik/${DOMAIN}.key
 
 
 ##
@@ -45,27 +45,27 @@ swarm_label_true: gen_env
 swarm_init:
 	docker swarm init
 
-rogue_network:
-	docker network create --driver overlay rogue-public
+rims_network:
+	docker network create --driver overlay rims-public
 
 mount_prep: gen_env
-	chmod 755 .env && . ./.env && mkdir -p ${ROGUE_DATA} && \
-	mkdir -p ${ROGUE_DATA}/postgres && \
-	mkdir -p ${ROGUE_DATA}/auth && \
-	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \
-	mkdir -p ${ROGUE_DATA}/keycloak && \
-	mkdir -p ${ROGUE_DATA}/certs && \
-	cp deployment/certs/* ${ROGUE_DATA}/certs && \
-	mkdir -p ${ROGUE_DATA}/registry && \
-	mkdir -p ${ROGUE_DATA}/traefik && \
-	deployment/traefik/config.yml ${ROGUE_DATA}/traefik \
-	mkdir -p ${ROGUE_DATA}/openkm/repository && \
-	mkdir -p ${ROGUE_DATA}/prometheus && \
-	mkdir -p ${ROGUE_DATA}/grafana && \
-	mkdir -p ${ROGUE_DATA}/caddy && \
-	mkdir -p ${ROGUE_DATA}/portainer && \
-	mkdir -p ${ROGUE_DATA}/jenkins && \
-	cp deployment/openkm/* ${ROGUE_DATA}/openkm
+	chmod 755 .env && . ./.env && mkdir -p ${RIMS_DATA} && \
+	mkdir -p ${RIMS_DATA}/postgres && \
+	mkdir -p ${RIMS_DATA}/auth && \
+	cp deployment/traefik_passwd ${RIMS_DATA}/auth/system_passwd && \
+	mkdir -p ${RIMS_DATA}/keycloak && \
+	mkdir -p ${RIMS_DATA}/certs && \
+	cp deployment/certs/* ${RIMS_DATA}/certs && \
+	mkdir -p ${RIMS_DATA}/registry && \
+	mkdir -p ${RIMS_DATA}/traefik && \
+	deployment/traefik/config.yml ${RIMS_DATA}/traefik \
+	mkdir -p ${RIMS_DATA}/openkm/repository && \
+	mkdir -p ${RIMS_DATA}/prometheus && \
+	mkdir -p ${RIMS_DATA}/grafana && \
+	mkdir -p ${RIMS_DATA}/caddy && \
+	mkdir -p ${RIMS_DATA}/portainer && \
+	mkdir -p ${RIMS_DATA}/jenkins && \
+	cp deployment/openkm/* ${RIMS_DATA}/openkm
 
 ##
 ## Environment management

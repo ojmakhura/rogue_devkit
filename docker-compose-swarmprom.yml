@@ -4,7 +4,7 @@ networks:
   net:
     driver: overlay
     attachable: true
-  rogue-public:
+  rims-public:
     external: true
 
 volumes:
@@ -14,11 +14,11 @@ volumes:
 
 configs:
   dockerd_config:
-    file: ${ROGUE_DATA}/caddy/Caddyfile
+    file: ${RIMS_DATA}/caddy/Caddyfile
   # node_rules:
-    # file: ${ROGUE_DATA}/prometheus/rules/swarm_node.rules.yml
+    # file: ${RIMS_DATA}/prometheus/rules/swarm_node.rules.yml
   # task_rules:
-    # file: ${ROGUE_DATA}/prometheus/rules/swarm_task.rules.yml
+    # file: ${RIMS_DATA}/prometheus/rules/swarm_task.rules.yml
 
 services:
   dockerd-exporter:
@@ -85,11 +85,11 @@ services:
       placement:
         constraints:
           - node.role == manager
-          - node.labels.rogue_portainer == true
+          - node.labels.rims_portainer == true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - traefik.docker.network=rims-public
+        - traefik.constraint-label=rims-public
         - traefik.http.routers.swarmprom-grafana-http.rule=Host(`${GRAFANA_DOMAIN}`)
         - traefik.http.routers.swarmprom-grafana-http.entrypoints=web
         - traefik.http.routers.swarmprom-grafana-http.middlewares=https-redirect
@@ -100,19 +100,19 @@ services:
         - traefik.http.services.swarmprom-grafana.loadbalancer.server.port=3000
     volumes:
       - type: bind
-        source: ${ROGUE_DATA}/grafana/data
+        source: ${RIMS_DATA}/grafana/data
         target: /var/lib/grafana
       - type: bind
-        source: ${ROGUE_DATA}/grafana/config/grafana-datasources.yml
+        source: ${RIMS_DATA}/grafana/config/grafana-datasources.yml
         target: /etc/grafana/provisioning/datasources/provisioning-datasources.yaml
       - type: bind
-        source: ${ROGUE_DATA}/grafana/config/grafana-dashboards.yml
+        source: ${RIMS_DATA}/grafana/config/grafana-dashboards.yml
         target: /etc/grafana/provisioning/dashboards/provisioning-dashboards.yaml
       - type: bind
-        source: ${ROGUE_DATA}/grafana/config/dashboards/grafana-dashboard-container-metrics.json
+        source: ${RIMS_DATA}/grafana/config/dashboards/grafana-dashboard-container-metrics.json
         target: /var/lib/grafana/dashboards/container-metrics.json
       - type: bind
-        source: ${ROGUE_DATA}/grafana/config/dashboards/grafana-dashboard-node-metrics.json
+        source: ${RIMS_DATA}/grafana/config/dashboards/grafana-dashboard-node-metrics.json
         target: /var/lib/grafana/dashboards/node-metrics.json
     environment:
       - GF_SECURITY_ADMIN_USER=admin
@@ -120,14 +120,14 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     networks:
       - net
-      - rogue-public   
+      - rims-public   
 
   alertmanager:
     image: stefanprodan/swarmprom-alertmanager:v0.14.0
     networks:
       - default
       - net
-      - rogue-public
+      - rims-public
     environment:
       - SLACK_URL=${SLACK_URL:-https://hooks.slack.com/services/TOKEN}
       - SLACK_CHANNEL=${SLACK_CHANNEL:-general}
@@ -137,7 +137,7 @@ services:
       - '--storage.path=/alertmanager'
     volumes:
       - alertmanager:/alertmanager
-        # - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
+        # - ${RIMS_DATA}/auth/system_passwd:/var/system_passwd
       # - ./swarmprom_passwd:/swarmprom_passwd
     deploy:
       mode: replicated
@@ -152,8 +152,8 @@ services:
           memory: 64M
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - traefik.docker.network=rims-public
+        - traefik.constraint-label=rims-public
         - traefik.http.routers.swarmprom-alertmanager-http.rule=Host(`alertmanager.${DOMAIN?Variable not set}`)
         - traefik.http.routers.swarmprom-alertmanager-http.entrypoints=${WEB_ENTRY}
         - traefik.http.routers.swarmprom-alertmanager-http.middlewares=https-redirect
@@ -170,9 +170,9 @@ services:
     networks:
       - default
       - net
-      - rogue-public
+      - rims-public
     # volumes:
-      # - ${ROGUE_DATA}/auth/system_passwd:/var/system_passwd
+      # - ${RIMS_DATA}/auth/system_passwd:/var/system_passwd
     environment:
       - "ALERTMANAGER_URIS=default:http://alertmanager:9093"
     deploy:
@@ -180,8 +180,8 @@ services:
       replicas: 1
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - traefik.docker.network=rims-public
+        - traefik.constraint-label=rims-public
         - traefik.http.routers.swarmprom-unsee-http.rule=Host(`unsee.${DOMAIN?Variable not set}`)
         - traefik.http.routers.swarmprom-unsee-http.entrypoints=${WEB_ENTRY}
         - traefik.http.routers.swarmprom-unsee-http.middlewares=https-redirect
@@ -235,11 +235,11 @@ services:
       placement:
         constraints:
           - node.role == manager
-          - node.labels.rogue_portainer == true
+          - node.labels.rims_portainer == true
       labels:
         - traefik.enable=true
-        - traefik.docker.network=rogue-public
-        - traefik.constraint-label=rogue-public
+        - traefik.docker.network=rims-public
+        - traefik.constraint-label=rims-public
         - traefik.http.routers.swarmprom-prometheus-http.rule=Host(`prometheus.${DOMAIN?Variable not set}`)
         - traefik.http.routers.swarmprom-prometheus-http.entrypoints=web
         - traefik.http.routers.swarmprom-prometheus-http.middlewares=https-redirect
@@ -252,17 +252,17 @@ services:
         # - traefik.http.routers.swarmprom-prometheus-https.middlewares=swarmprom-prometheus-auth
     volumes:
       - type: bind
-        source: ${ROGUE_DATA}/prometheus/data
+        source: ${RIMS_DATA}/prometheus/data
         target: /prometheus
       - type: bind
-        source: ${ROGUE_DATA}/prometheus/config/prometheus.yml
+        source: ${RIMS_DATA}/prometheus/config/prometheus.yml
         target: /etc/prometheus/prometheus.yml
       # - type: bind
-        # source: ${ROGUE_DATA}/hosts
+        # source: ${RIMS_DATA}/hosts
         # target: /etc/hosts
     environment:
       METRICS_PATH: /actuator/prometheus
       TARGETS: ${API_URL}
     networks:
       - net
-      - rogue-public
+      - rims-public
