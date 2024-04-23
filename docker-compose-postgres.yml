@@ -57,45 +57,6 @@ services:
     networks:
       rims-public:
 
-  ###############################################################################
-  # Postgres administration frontend
-  ###############################################################################
-  pgadmin:
-    hostname: pgadmin
-    image: dpage/pgadmin4:7
-    networks:
-      rims-public:
-    # depends_on:
-      # proxy:
-      #   condition: service_healthy
-      # db:
-      #  condition: service_healthy
-    volumes:
-      - ${RIMS_DATA}/pgadmin:/var/lib/pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      SCRIPT_NAME: /pgadmin
-      TZ: Africa/Gaborone
-    deploy:
-      placement:
-        constraints:
-          # Make the traefik service run only on the node with this label
-          # as the node with it has the volume for the certificates
-          - node.labels.rims_proxy == true
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=rims-public"
-        - "traefik.constraint-label=rims-public"
-        - "traefik.http.routers.rims-pgadmin-http.rule=Host(`${DB_DOMAIN}`) && PathPrefix(`/pgadmin`)"
-        - "traefik.http.routers.rims-pgadmin-http.entrypoints=web"
-        - "traefik.http.routers.rims-pgadmin-http.middlewares=https-redirect"
-        - "traefik.http.services.rims-pgadmin.loadbalancer.server.port=80"
-        - "traefik.http.routers.rims-pgadmin-https.entrypoints=websecure"
-        - "traefik.http.routers.rims-pgadmin-https.rule=Host(`${DB_DOMAIN}`) && PathPrefix(`/pgadmin`)"
-        - "traefik.http.routers.rims-pgadmin-https.tls=true"
-        - "traefik.http.routers.rims-pgadmin-https.tls.certresolver=le"
-
 ###############################################################################
 # Networks
 ###############################################################################
