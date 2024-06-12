@@ -5,7 +5,7 @@ services:
   ###############################################################################
   postgres-db:
     hostname: db
-    image: bitnami/postgresql:15
+    image: bitnami/postgresql:16
     volumes:
       - ${ROGUE_DATA}/postgres:/bitnami/postgresql
     environment:
@@ -62,7 +62,7 @@ services:
   ###############################################################################
   pgadmin:
     hostname: pgadmin
-    image: dpage/pgadmin4:7
+    image: dpage/pgadmin4:8
     networks:
       rogue-public:
     # depends_on:

@@ -1,0 +1,65 @@
+version: '3'
+
+services:
+  mariadb:
+    image: 'bitnami/mariadb:latest'
+    networks:
+      rogue-public:
+    volumes:
+      - ${ROGUE_DATA}/mariadb:/bitnami/mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_db == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.tcp.routers.rogue-db-mariadb.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.rogue-db-mariadb.entrypoints=mariadb"
+        - "traefik.tcp.routers.rogue-db.service=mariadb"
+        # - "traefik.tcp.routers.rogue-db-mariadb.tls.certresolver=le"
+        - "traefik.tcp.services.rogue-db.loadbalancer.server.port=3306"
+  phpmyadmin:
+    image: 'bitnami/phpmyadmin:latest'
+    volumes:
+      - ${ROGUE_DATA}/phpmyadmin:/bitnami/mariadb
+    networks:
+      rogue-public:
+    environment:
+      DATABASE_HOST: mariadb
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_USER: ${MARIADB_USER}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_proxy == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.rogue-phpmyadmin-http.rule=Host(`${PHPMYADMIN_URL}`)"
+        - "traefik.http.routers.rogue-phpmyadmin-http.entrypoints=web"
+        - "traefik.http.routers.rogue-phpmyadmin-http.middlewares=https-redirect"
+        - "traefik.http.services.rogue-phpmyadmin.loadbalancer.server.port=80"
+        - "traefik.http.routers.rogue-phpmyadmin-https.entrypoints=websecure"
+        - "traefik.http.routers.rogue-phpmyadmin-https.rule=Host(`${PHPMYADMIN_URL}`)"
+        - "traefik.http.routers.rogue-phpmyadmin-https.tls=true"
+        # - "traefik.http.routers.rogue-phpmyadmin-https.tls.certresolver=le"
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

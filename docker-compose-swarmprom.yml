@@ -73,7 +73,7 @@ services:
       - net
 
   grafana:
-    image: grafana/grafana:10.0.0
+    image: grafana/grafana:10.3.1
     user: "$UID:$GID"
     # ports:
     #   - target: 3000
@@ -123,7 +123,7 @@ services:
       - rogue-public   
 
   alertmanager:
-    image: stefanprodan/swarmprom-alertmanager:v0.14.0
+    image: stefanprodan/swarmprom-alertmanager:v0.15.3
     networks:
       - default
       - net
@@ -194,7 +194,7 @@ services:
         # - traefik.http.routers.swarmprom-unsee-https.middlewares=swarmprom-unsee-auth
 
   node-exporter:
-    image: bitnami/node-exporter:1.6.0
+    image: bitnami/node-exporter:1.7.0
     command:
       - '--path.sysfs=/host/sys'
       - '--path.procfs=/host/proc'
@@ -224,7 +224,7 @@ services:
       - net
 
   prometheus:
-    image: bitnami/prometheus:2.44.0
+    image: bitnami/prometheus:2.49.1
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--log.level=error'
