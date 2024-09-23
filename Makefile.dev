@@ -57,6 +57,7 @@ ENV = printf "%s\n" \
     "export IMAGE_VERSION=${IMAGE_VERSION}"\
     "export DOMAIN=${DOMAIN}"\
     "export PHPMYADMIN_URL=${PHPMYADMIN_URL}"\
+    "export PGADMIN_DOMAIN=${PGADMIN_URL}"\
     "export DB_DOMAIN=${ROGUE_DB_SUBDOMAIN}.${DOMAIN}"\
     "export MARIADB_DOMAIN=${ROGUE_MARIADB_SUBDOMAIN}.${DOMAIN}"\
     "export GRAFANA_DOMAIN=${ROGUE_GRAFANA_SUBDOMAIN}.${DOMAIN}"\
@@ -86,4 +87,8 @@ ENV = printf "%s\n" \
     "export MARIADB_USER=${MARIADB_USER}"\
     "export MARIADB_PASSWORD=${MARIADB_PASSWORD}"\
     "export MARIADB_DATABASE=${MARIADB_DATABASE}"\
+    "export NPM_DB=${NPM_DB}"\
+    "export NPM_DB_USER=${NPM_DB_USER}"\
+    "export NPM_DB_PASSWORD=${NPM_DB_PASSWORD}"\
+    "export NPM_DB_ROOT_PASSWORD=${NPM_DB_ROOT_PASSWORD}"\
     >> .env
