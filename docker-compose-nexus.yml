@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  nexus: 
+    image: sonatype/nexus3
+    volumes:
+      - ${ROGUE_DATA}/nexus:/nexus-data
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_nexus == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.registry-http.rule=Host(`${NEXUS_DOMAIN}`)"
+        - "traefik.http.routers.registry-http.entrypoints=${WEB_ENTRY}"
+        - "traefik.http.routers.registry-http.middlewares=https-redirect"
+        - "traefik.http.routers.registry-https.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.registry-https.rule=Host(`${NEXUS_DOMAIN}`)"
+        - "traefik.http.routers.registry-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.registry-https.tls.certresolver=le"
+        - "traefik.http.services.registry.loadbalancer.server.port=8081"
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true
