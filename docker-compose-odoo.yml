@@ -1,0 +1,30 @@
+version: '3.1'
+services:
+  odoo:
+    image: odoo:17.0
+    # ports:
+      # - "8069:8069"
+    volumes:
+      - ${ROGUE_DATA}/odoo/web-data:/var/lib/odoo
+      - ${ROGUE_DATA}/odoo/config:/etc/odoo
+      - ${ROGUE_DATA}/odoo/addons:/mnt/extra-addons
+      - ${ROGUE_DATA}/odoo/hosts:/etc/hosts
+    environment:
+      - HOST=postgres-db
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_odoo == true
+volumes:
+  odoo-web-data:
+networks:
+  # Use the previously created public network "rogue-public", shared with other
+  # services that need to be publicly available via this Traefik
+  rogue-public:
+    external: true
