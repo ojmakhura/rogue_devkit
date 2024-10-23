@@ -31,6 +31,8 @@ services:
       - agent-network
       - rogue-public
       #- rogueswarm
+    expose:
+      - 9000
     deploy:
       mode: global
       placement:
