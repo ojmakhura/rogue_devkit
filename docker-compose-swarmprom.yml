@@ -255,7 +255,7 @@ services:
         source: ${ROGUE_DATA}/prometheus/data
         target: /prometheus
       - type: bind
-        source: ${ROGUE_DATA}/prometheus/config/prometheus.yml
+        source: ${ROGUE_DATA}/prometheus/prometheus.yml
         target: /etc/prometheus/prometheus.yml
       # - type: bind
         # source: ${ROGUE_DATA}/hosts
