@@ -56,49 +56,6 @@ services:
           - node.labels.rogue_db == true
     networks:
       rogue-public:
-
-  ###############################################################################
-  # Postgres administration frontend
-  ###############################################################################
-  pgadmin:
-    hostname: pgadmin
-    image: dpage/pgadmin4:8
-    networks:
-      rogue-public:
-    # depends_on:
-      # proxy:
-      #   condition: service_healthy
-      # db:
-      #  condition: service_healthy
-    volumes:
-      - ${ROGUE_DATA}/pgadmin:/var/lib/pgadmin
-    ports:
-      - 80
-      - 443
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      # SCRIPT_NAME: /pgadmin
-      TZ: Africa/Gaborone
-    deploy:
-      placement:
-        constraints:
-          # Make the traefik service run only on the node with this label
-          # as the node with it has the volume for the certificates
-          - node.labels.rogue_proxy == true
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
-        - "traefik.http.routers.rogue-pgadmin-http.rule=Host(`${PGADMIN_DOMAIN}`)"
-        - "traefik.http.routers.rogue-pgadmin-http.entrypoints=web"
-        - "traefik.http.routers.rogue-pgadmin-http.middlewares=https-redirect"
-        - "traefik.http.services.rogue-pgadmin.loadbalancer.server.port=80"
-        - "traefik.http.routers.rogue-pgadmin-https.entrypoints=websecure"
-        - "traefik.http.routers.rogue-pgadmin-https.rule=Host(`${PGADMIN_DOMAIN}`)"
-        - "traefik.http.routers.rogue-pgadmin-https.tls=true"
-        - "traefik.http.routers.rogue-pgadmin-https.tls.certresolver=le"
-
 ###############################################################################
 # Networks
 ###############################################################################
