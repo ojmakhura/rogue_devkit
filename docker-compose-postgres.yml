@@ -13,6 +13,7 @@ services:
       POSTGRESQL_USERNAME: ${POSTGRES_USER}
       POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRESQL_DATABASE: ${POSTGRES_DB}
+      POSTGRESQL_MAX_CONNECTIONS: 2000
       TZ: Africa/Gaborone
     # depends_on:
     #   proxy:

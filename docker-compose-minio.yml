@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Rabbit MQ
+  ###############################################################################
+  minio:
+    image: minio:management
+    container_name: bocraportal-minio
+    hostname: minio
+    volumes:
+     - ${BOCRA_DATA}/minio:/data
+    environment:
+      MINIO_ROOT_USER: ${minio_DEFAULT_USER}
+      MINIO_ROOT_PASSWORD: ${minio_DEFAULT_PASS}
+      MINIO_DEFAULT_BUCKETS: your_bucket_name
+      TZ: Africa/Gaborone
+    healthcheck:
+      test: minio-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    networks:
+      bocraportal-public:
+    ports:
+      - "${minio_SERVICE_PORT}:${minio_SERVICE_PORT}"
+      - "${minio_WEB_PORT}:${minio_WEB_PORT}"
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.bocraportal_api == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.minio-web.rule=Host(`${MINIO_DOMAIN}`)"
+        - "traefik.http.routers.minio-web.entrypoints=web"
+        - "traefik.http.routers.minio-web.middlewares=https-redirect"
+        - "traefik.http.routers.minio-websecure.entrypoints=websecure"
+        - "traefik.http.routers.minio-websecure.rule=Host(`${MINIO_DOMAIN}`)"
+        - "traefik.http.routers.minio-websecure.tls=true"
+        - "traefik.http.services.minio.loadbalancer.server.port=15672"
+        #tcp
+        - "traefik.tcp.routers.minio-ingress.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.minio-ingress.entrypoints=minio"
+        - "traefik.tcp.services.minio-ingress.loadbalancer.server.port=5672"
+        - "traefik.tcp.routers.minio-ingress.tls=true"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  bocraportal-public:
+    external: true
