@@ -16,6 +16,9 @@ services:
       - rogue-public
     volumes:
       - ${ROGUE_DATA}/letsencrypt:/etc/letsencrypt
+      # - ./proxy.roguedev.local.conf:/data/nginx/proxy_host/proxy.roguedev.local.conf
+    depends_on:
+      - db
     deploy:
       placement:
         constraints:

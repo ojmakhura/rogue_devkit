@@ -1,53 +1,55 @@
 version: "3.9"
 services:
   ###############################################################################
-  # Rabbit MQ
+  # Minio Server
   ###############################################################################
   minio:
-    image: minio:management
-    container_name: bocraportal-minio
+    image: bitnami/minio:latest
     hostname: minio
     volumes:
-     - ${BOCRA_DATA}/minio:/data
+     - ${ROGUE_DATA}/minio:/bitnami/minio/data
     environment:
-      MINIO_ROOT_USER: ${minio_DEFAULT_USER}
-      MINIO_ROOT_PASSWORD: ${minio_DEFAULT_PASS}
-      MINIO_DEFAULT_BUCKETS: your_bucket_name
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_DISTRIBUTED_MODE_ENABLED: "no"
+      # MINIO_SERVER_URL: https://minio.roguedev.local
+      BITNAMI_DEBUG: 'true'
       TZ: Africa/Gaborone
-    healthcheck:
-      test: minio-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
     networks:
-      bocraportal-public:
-    ports:
-      - "${minio_SERVICE_PORT}:${minio_SERVICE_PORT}"
-      - "${minio_WEB_PORT}:${minio_WEB_PORT}"
+      rogue-public:
     deploy:
       placement:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.bocraportal_api == true
+          - node.labels.rogue_minio == true
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.minio-web.rule=Host(`${MINIO_DOMAIN}`)"
-        - "traefik.http.routers.minio-web.entrypoints=web"
-        - "traefik.http.routers.minio-web.middlewares=https-redirect"
-        - "traefik.http.routers.minio-websecure.entrypoints=websecure"
-        - "traefik.http.routers.minio-websecure.rule=Host(`${MINIO_DOMAIN}`)"
-        - "traefik.http.routers.minio-websecure.tls=true"
-        - "traefik.http.services.minio.loadbalancer.server.port=15672"
-        #tcp
-        - "traefik.tcp.routers.minio-ingress.rule=HostSNI(`*`)"
-        - "traefik.tcp.routers.minio-ingress.entrypoints=minio"
-        - "traefik.tcp.services.minio-ingress.loadbalancer.server.port=5672"
-        - "traefik.tcp.routers.minio-ingress.tls=true"
+        - "traefik.docker.network=rogue-public"
 
+        - traefik.http.routers.minio-https.rule=Host(`${MINIO_DOMAIN}`)
+        - traefik.http.routers.minio-https.entrypoints=websecure
+        - traefik.http.routers.minio-https.service=minio
+        - traefik.http.routers.minio-https.tls=true
+        - traefik.http.routers.minio-http.rule=Host(`${MINIO_DOMAIN}`)
+        - traefik.http.routers.minio-http.entrypoints=web
+        - traefik.http.routers.minio-http.middlewares=https-redirect
+        - traefik.http.routers.minio-http.service=minio
+        - traefik.http.services.minio.loadbalancer.server.port=9000
+
+        - traefik.http.routers.minio-console-https.rule=Host(`${MINIO_CONSOLE_DOMAIN}`)
+        - traefik.http.routers.minio-console-https.entrypoints=websecure
+        - traefik.http.routers.minio-console-https.service=minio-console
+        - traefik.http.routers.minio-console-https.tls=true
+        - traefik.http.routers.minio-console-http.rule=Host(`${MINIO_CONSOLE_DOMAIN}`)
+        - traefik.http.routers.minio-console-http.entrypoints=web
+        - traefik.http.routers.minio-console-http.middlewares=https-redirect
+        - traefik.http.routers.minio-console-http.service=minio-console
+        - traefik.http.services.minio-console.loadbalancer.server.port=9001
+      
 ###############################################################################
 # Networks
 ###############################################################################
 networks:
-  bocraportal-public:
+  rogue-public:
     external: true

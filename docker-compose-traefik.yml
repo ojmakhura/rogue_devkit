@@ -39,6 +39,8 @@ services:
       - "--entrypoints.mssql.address=:1433"
       - "--entrypoints.registry.address=:5000"
       - "--entrypoints.rabbitmq.address=:5672"
+      - "--entrypoints.minio.address=:9001"
+      - "--entrypoints.minio-api.address=:9000"
       - "--entryPoints.ping.address=:8082"
       - "--log.level=DEBUG"
       - "--accessLog"
