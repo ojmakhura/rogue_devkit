@@ -18,6 +18,7 @@ services:
       - 3306:3306
       - 1433:1433
       - 6379:6379
+      - 9000:9000
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:8082/ping","--spider" ]
       interval: 10s

@@ -6,6 +6,7 @@ services:
       - ${ROGUE_DATA}/redis:/bitnami/redis/data
     environment:
       ALLOW_EMPTY_PASSWORD: ${ALLOW_EMPTY_PASSWORD}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     networks:
       rogue-public:
     deploy:
@@ -21,17 +22,8 @@ services:
         - "traefik.tcp.routers.redis.service=redis"
         # services (needed for TCP)
         - "traefik.tcp.services.redis.loadbalancer.server.port=6379"
-
         - "traefik.docker.network=rogue-public"
         - "traefik.constraint-label=rogue-public"
-        # - "traefik.http.routers.redis-http.rule=Host(`${REDIS_DOMAIN}`)"
-        # - "traefik.http.routers.redis-http.entrypoints=web"
-        # - "traefik.http.routers.redis-http.middlewares=https-redirect"
-        # - "traefik.http.routers.redis-https.entrypoints=websecure"
-        # - "traefik.http.routers.redis-https.rule=Host(`${REDIS_DOMAIN}`)"
-        # - "traefik.http.routers.redis-https.tls=${SSL_SECURE}"
-        # - "traefik.http.routers.redis-https.tls.certresolver=le"
-        # - "traefik.http.services.redis.loadbalancer.server.port=6379"
 ###############################################################################
 # Networks
 ###############################################################################
