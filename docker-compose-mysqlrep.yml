@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  mysql-primary:
+    image: bitnami/mysql:8.4.5
+    environment:
+      - MYSQL_REPLICATION_MODE=master
+      - MYSQL_REPLICATION_USER=${MYSQL_REPLICATION_USER}
+      - MYSQL_REPLICATION_PASSWORD=${MYSQL_REPLICATION_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    volumes:
+      - ${ROGUE_DATA}/mysql/primary:/bitnami/mysql
+    ports:
+      - "3306"
+    networks:
+      - rogue-public
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_mysql_primary == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.tcp.routers.rogue-mysql-primary.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.rogue-mysql-primary.entrypoints=mariadb"
+        - "traefik.tcp.routers.rogue-mysql-primary=mariadb"
+        # - "traefik.tcp.routers.rogue-mysql-primary.tls.certresolver=le"
+        - "traefik.tcp.services.rogue-mysql-primary.loadbalancer.server.port=3306"
+
+  mysql-replica:
+    image: bitnami/mysql:8.4.5
+    environment:
+      - MYSQL_REPLICATION_MODE=slave
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_REPLICATION_USER=${MYSQL_REPLICATION_USER}
+      - MYSQL_REPLICATION_PASSWORD=${MYSQL_REPLICATION_PASSWORD}
+      - MYSQL_MASTER_HOST=mysql-primary
+      - MYSQL_MASTER_ROOT_PASSWORD=${MYSQL_MASTER_ROOT_PASSWORD}
+    volumes:
+      - ${ROGUE_DATA}/mysql/replica1:/bitnami/mysql
+    ports:
+      - "3306"
+    networks:
+      - rogue-public
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_mysql_replica == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.tcp.routers.rogue-mysql-replica.rule=HostSNI(`*`)"
+        # - "traefik.tcp.routers.rogue-mysql-replica.entrypoints=mariadb"
+        # - "traefik.tcp.routers.rogue-mysql-replica.service=mariadb"
+        # - "traefik.tcp.routers.rogue-mysql-replica.tls.certresolver=le"
+        # - "traefik.tcp.services.rogue-mysql-replica.loadbalancer.server.port=3306"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

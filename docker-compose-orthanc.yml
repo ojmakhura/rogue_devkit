@@ -1,0 +1,177 @@
+# SPDX-FileCopyrightText: 2022 - 2024 Orthanc Team SRL <info@orthanc.team>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+version: "3"
+services:
+
+#   nginx:
+#     image: orthancteam/orthanc-nginx:25.1.0
+#     depends_on: [orthanc, orthanc-auth-service, keycloak]
+#     restart: unless-stopped
+#     ports: ["80:80"]
+# # if setting ENABLE_HTTPS: "true" env var, uncomment the following 4 lines and comment the line with 'ports: ["80:80"]'
+# #    ports: ["443:443"]
+# #    volumes:
+# #      - /.../crt.pem:/etc/nginx/tls/crt.pem
+# #      - /.../key.pem:/etc/nginx/tls/key.pem
+#     environment:
+#       ENABLE_ORTHANC: "true"
+#       ENABLE_KEYCLOAK: "true"
+#       ENABLE_ORTHANC_TOKEN_SERVICE: "false"
+#       ENABLE_HTTPS: "false"
+# # to use OHIF-plugin: you don't need the OHIF reverse proxy
+#       ENABLE_OHIF: "true"
+
+  orthanc:
+    image: orthancteam/orthanc:25.1.1
+    volumes:
+      - ${ROGUE_DATA}/orthanc/data:/var/lib/orthanc/db
+    restart: unless-stopped
+    ports:
+      - 8042:8042
+    environment:
+      STONE_WEB_VIEWER_PLUGIN_ENABLED: "true"
+      DICOM_WEB_PLUGIN_ENABLED: "true"
+      # to use OHIF-plugin:  make sure to have a "OHIF" config and use "dicom-web" source
+#      OHIF_PLUGIN_ENABLED: "true"
+      # ORTHANC__POSTGRESQL__HOST: "postgres-db"
+      ORTHANC__POSTGRESQL__TRANSACTION_MODE: "ReadCommitted"
+      VERBOSE_ENABLED: "true"
+      VERBOSE_STARTUP: "true"
+      ORTHANC_JSON: |
+        {
+          "Name": "Orthanc",
+          "OrthancExplorer2": {
+            "IsDefaultUI": true,
+            "UiOptions": {
+              "EnableShares": true,
+              "DefaultShareDuration": 0,
+              "ShareDurations": [0, 7, 15, 30, 90, 365],
+              "EnableOpenInOhifViewer3": true,
+              // to use OHIF-plugin:  use https://roguedev.local/orthanc/ohif/
+              //"OhifViewer3PublicRoot": "https://roguedev.local/orthanc/ohif/"
+              "OhifViewer3PublicRoot": "https://roguedev.local/ohif/"
+            },
+            "Tokens" : {
+              "InstantLinksValidity": 3600,
+              "ShareType": "ohif-viewer-publication"
+            },
+            "Keycloak" : {
+              "Enable": true,
+              "Url": "https://keycloak.roguedev.local",
+              "Realm": "orthanc",
+              "ClientId": "orthanc"
+            }
+          },
+          "AuthenticationEnabled": false,     // because it is handled by the authorization plugin
+          "Authorization": {
+            "WebServiceRootUrl": "http://orthanc-auth-service:8000/",
+            "WebServiceUsername": "share-user",
+            "WebServicePassword": "change-me",
+            // to use OHIF-plugin:  make sure to include "ohif" in the list
+            "StandardConfigurations" : [
+              "osimis-web-viewer",
+              "stone-webviewer",
+              "orthanc-explorer-2",
+              "ohif"
+            ],
+            "TokenHttpHeaders" : [ "api-key" ],
+            "CheckedLevel": "studies"
+          },
+          "DicomWeb": {
+            "Enable": true,
+            "PublicRoot": "/orthanc/dicom-web/"
+          },
+          "PostgreSQL" : {
+            "Host": "postgres-db",
+            "Database": "orthanc",
+            "Password": "Cash8Aes",
+            "Username": "rogueadmin"
+          }
+          // to use OHIF-plugin:  make sure to have a "OHIF" config and use "dicom-web" source
+          //, "OHIF": {
+          //  "DataSource": "dicom-web",
+          //  "RouterBasename": "/orthanc/ohif/"
+          //}
+        }
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rogue_keycloak == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.orthanc-http.rule=Host(`roguedev.local`) && PathPrefix(`/orthanc`)"
+        - "traefik.http.routers.orthanc-http.entrypoints=web"
+        - "traefik.http.routers.orthanc-http.middlewares=https-redirect"
+        - "traefik.http.services.orthanc.loadbalancer.server.port=8042"
+        - "traefik.http.routers.orthanc-https.entrypoints=websecure"
+        - "traefik.http.routers.orthanc-https.rule=Host(`roguedev.local`) && PathPrefix(`/orthanc`)"
+        - "traefik.http.routers.orthanc-https.tls=${SSL_SECURE}"
+        # - "traefik.http.routers.orthanc-https.tls.certresolver=le"
+
+  orthanc-auth-service:
+    image: orthancteam/orthanc-auth-service:25.1.0
+    # always disable port mapping in production !!!
+    ports: ["8000:8000"]
+    # permissions can be customized in the permissions.json file
+    volumes:
+      - ${ROGUE_DATA}/orthanc/permissions.jsonc:/orthanc_auth_service/permissions.json
+    restart: unless-stopped
+    networks:
+      rogue-public:
+    environment:
+      SECRET_KEY: "change-me-I-am-a-secret-key"
+      ENABLE_KEYCLOAK: "true"
+#      ENABLE_KEYCLOAK_API_KEYS: "true"
+#      # to enable the permissions edition UI in OE2, you need to provide a KEYCLOAK_CLIENT_SECRET
+#      KEYCLOAK_CLIENT_SECRET: "change-me-I-am-a-secret-you-get-in-keycloak-logs"
+      # KEYCLOAK_URI: https://keycloak.roguedev.local/realms/orthanc
+      # KEYCLOAK_ADMIN_URI: https://keycloak.roguedev.local/admin/realms/orthanc
+      KEYCLOAK_CLIENT_SECRET: "iIeVBZ4XHU9O8PrD2kHWjhqdJChzM00Q"
+      PUBLIC_ORTHANC_ROOT: "https://roguedev.local/orthanc/"
+      PUBLIC_LANDING_ROOT: "https://roguedev.local/orthanc/ui/app/token-landing.html"
+      # to use OHIF-plugin:  make sure to use http://roguedev.local/orthanc/ohif/
+      PUBLIC_OHIF_ROOT: "https://roguedev.local/ohif/"
+#      PUBLIC_OHIF_ROOT: "http://roguedev.local/orthanc/ohif/"
+      USERS: |
+        {
+          "share-user": "change-me"
+        }
+
+# to use OHIF-plugin: you don't need this container
+  ohif:
+    image: orthancteam/ohif-v3:25.1.0
+#  uncomment if you want to customize ohif configuration
+#    volumes:
+#      - ./ohif-app-config.js:/usr/share/nginx/html/app-config.js
+    restart: unless-stopped
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rogue_keycloak == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.ohif-http.rule=Host(`roguedev.local`) && PathPrefix(`/ohif`)"
+        - "traefik.http.routers.ohif-http.entrypoints=web"
+        - "traefik.http.routers.ohif-http.middlewares=https-redirect"
+        - "traefik.http.services.ohif.loadbalancer.server.port=80"
+        - "traefik.http.routers.ohif-https.entrypoints=websecure"
+        - "traefik.http.routers.ohif-https.rule=Host(`roguedev.local`) && PathPrefix(`/ohif`)"
+        - "traefik.http.routers.ohif-https.tls=${SSL_SECURE}"
+        # - "traefik.http.routers.ohif-https.tls.certresolver=le"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true
