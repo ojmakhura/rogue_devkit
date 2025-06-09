@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   odoo:
-    image: odoo:17.0
+    image: odoo:18
     # ports:
       # - "8069:8069"
     volumes:
@@ -21,6 +21,18 @@ services:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
           - node.labels.rogue_odoo == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.odoo-http.rule=Host(`${ODOO_DOMAIN}`)"
+        - "traefik.http.routers.odoo-http.entrypoints=${WEB_ENTRY}"
+        - "traefik.http.routers.odoo-http.middlewares=https-redirect"
+        - "traefik.http.routers.odoo-https.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.odoo-https.rule=Host(`${ODOO_DOMAIN}`)"
+        - "traefik.http.routers.odoo-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.odoo-https.tls.certresolver=le"
+        - "traefik.http.services.odoo.loadbalancer.server.port=8069"
 volumes:
   odoo-web-data:
 networks:

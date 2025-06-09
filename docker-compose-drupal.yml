@@ -1,0 +1,51 @@
+version: '3.7'
+
+services:
+  drupal:
+    image: drupal:latest
+    container_name: rdrupal
+    ports:
+      - 9080:80
+    volumes:
+      - drupal_modules:/var/www/html/modules
+      - drupal_profiles:/var/www/html/profiles
+      - drupal_themes:/var/www/html/themes
+      - drupal_sites:/var/www/html/sites
+    networks:
+         drupal_network:
+            ipv4_address: 192.168.13.12
+    environment:
+         DB_HOST: 192.168.13.17
+         TZ: Africa/Gaborone
+
+  drupaldb:
+      container_name: drupaldb
+      image: mysql/mysql-server
+      environment:
+         MYSQL_ROOT_PASSWORD: whocares!
+         MYSQL_DATABASE: drupal
+         MYSQL_USER: testuser
+         MYSQL_PASSWORD: TestUser123!
+         TZ: Africa/Gaborone
+      ports:
+         - 3306:3306
+      volumes:
+         - db_data:/var/lib/mysql
+      networks:
+         drupal_network:
+            ipv4_address: 192.168.13.17
+
+networks:
+   drupal_network:
+      name: drupal_network
+      driver: bridge
+      ipam:
+         driver: default
+         config:
+            - subnet: 192.168.13.0/24
+volumes:
+  drupal_modules:
+  drupal_profiles:
+  drupal_themes:
+  drupal_sites:
+  db_data:

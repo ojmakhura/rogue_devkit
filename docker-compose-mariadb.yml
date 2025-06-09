@@ -52,7 +52,7 @@ services:
         - "traefik.http.routers.rogue-phpmyadmin-http.rule=Host(`${PHPMYADMIN_URL}`)"
         - "traefik.http.routers.rogue-phpmyadmin-http.entrypoints=web"
         - "traefik.http.routers.rogue-phpmyadmin-http.middlewares=https-redirect"
-        - "traefik.http.services.rogue-phpmyadmin.loadbalancer.server.port=80"
+        - "traefik.http.services.rogue-phpmyadmin.loadbalancer.server.port=8080"
         - "traefik.http.routers.rogue-phpmyadmin-https.entrypoints=websecure"
         - "traefik.http.routers.rogue-phpmyadmin-https.rule=Host(`${PHPMYADMIN_URL}`)"
         - "traefik.http.routers.rogue-phpmyadmin-https.tls=true"

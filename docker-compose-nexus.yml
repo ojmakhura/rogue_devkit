@@ -24,6 +24,17 @@ services:
         - "traefik.http.routers.registry-https.tls=${SSL_SECURE}"
         - "traefik.http.routers.registry-https.tls.certresolver=le"
         - "traefik.http.services.registry.loadbalancer.server.port=8081"
+
+        # - "traefik.http.routers.docker-registry-http.rule=Host(`${NEXUS_DOCKER_DOMAIN}`)"
+        # - "traefik.http.routers.docker-registry-http.entrypoints=${WEB_ENTRY}"
+        # - "traefik.http.routers.docker-registry-http.middlewares=https-redirect"
+
+        # - "traefik.http.routers.docker-registry-https.entrypoints=${WEBSECURE_ENTRY}"
+        # - "traefik.http.routers.docker-registry-https.rule=Host(`${NEXUS_DOCKER_DOMAIN}`)"
+        # - "traefik.http.routers.docker-registry-https.tls=${SSL_SECURE}"
+        # - "traefik.http.routers.docker-registry-https.tls.certresolver=le"
+        # - "traefik.http.services.docker-registry.loadbalancer.server.port=5000"
+
 ###############################################################################
 # Networks
 ###############################################################################

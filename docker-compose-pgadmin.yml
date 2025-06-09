@@ -5,7 +5,7 @@ services:
   ###############################################################################
   pgadmin:
     hostname: pgadmin
-    image: dpage/pgadmin4:8
+    image: dpage/pgadmin4:9
     networks:
       rogue-public:
     # depends_on:
