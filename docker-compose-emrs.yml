@@ -1,0 +1,105 @@
+version: "3.7"
+
+services:
+  web1:
+    image: intellisoftdev/botswanaemr-web-dev:1.0.12
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '6'
+          memory: 12G
+        reservations:
+          cpus: '1'
+          memory: 2G
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.labels.rogue_db == true
+      
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.registry-http.rule=Host(`openmrs.roguedev.local`)"
+        - "traefik.http.routers.registry-http.entrypoints=web"
+        - "traefik.http.routers.registry-http.middlewares=https-redirect"
+        - "traefik.http.routers.registry-https.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.registry-https.rule=Host(`openmrs.roguedev.local`)"
+        - "traefik.http.routers.registry-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.registry-https.tls.certresolver=le"
+        - "traefik.http.services.registry.loadbalancer.server.port=8080"
+    ports:
+      - "8080:8080"
+    environment:
+      OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
+      OMRS_CONFIG_AUTO_UPDATE_DATABASE: "false"
+      OMRS_CONFIG_CREATE_TABLES: "false"
+      OMRS_CONFIG_CONNECTION_SERVER: mysql-primary
+      OMRS_CONFIG_CONNECTION_URL: jdbc:mysql://mysql-primary:3306/openmrs?allowPublicKeyRetrieval=true&autoReconnect=true&useSSL=false&sessionVariables=default_storage_engine=InnoDB
+      OMRS_CONFIG_CONNECTION_DATABASE: openmrs
+      OMRS_CONFIG_CONNECTION_USERNAME: openmrs
+      OMRS_CONFIG_CONNECTION_PASSWORD: openmrs
+      _JAVA_OPTIONS: '-Xmx4096m -Xms4096m' 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/openmrs"]
+      timeout: 5s
+    logging:
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - rogue-public
+    # secrets:
+    #   - openmrs_db_password
+  # web2:
+  #   image: intellisoftdev/botswanaemr-web-dev:latest
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     resources:
+  #       limits:
+  #         cpus: '6'
+  #         memory: 12G
+  #       reservations:
+  #         cpus: '1'
+  #         memory: 2G
+  #     restart_policy:
+  #       condition: on-failure
+  #     placement:
+  #       constraints:
+  #         - node.labels.rogue_db == true
+  #   environment:
+  #     OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
+  #     OMRS_CONFIG_AUTO_UPDATE_DATABASE: "false"
+  #     OMRS_CONFIG_CREATE_TABLES: "false"
+  #     OMRS_CONFIG_CONNECTION_SERVER: mysql-primary
+  #     OMRS_CONFIG_CONNECTION_URL: jdbc:mysql://mysql-primary:3306/openmrs?allowPublicKeyRetrieval=true&autoReconnect=true&useSSL=false&sessionVariables=default_storage_engine=InnoDB
+  #     OMRS_CONFIG_CONNECTION_DATABASE: openmrs
+  #     OMRS_CONFIG_CONNECTION_USERNAME: openmrs
+  #     OMRS_CONFIG_CONNECTION_PASSWORD: openmrs
+  #     _JAVA_OPTIONS: '-Xmx4096m -Xms4096m'
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/openmrs"]
+  #     timeout: 5s
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+  #   networks:
+  #     - rogue-public
+    # secrets:
+    #   - openmrs_db_password
+
+networks:
+  rogue-public:
+    external: true
+
+# volumes:
+#   openmrs-data:
+
+# secrets:
+#   openmrs_db_password:
+#     external: true
