@@ -12,6 +12,9 @@ services:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       MINIO_DISTRIBUTED_MODE_ENABLED: "no"
+      # MINIO_CONSOLE_PORT_NUMBER: 9001
+      MINIO_BROWSER: "on"
+      
       # MINIO_SERVER_URL: https://minio.roguedev.local
       BITNAMI_DEBUG: 'true'
       TZ: Africa/Gaborone
