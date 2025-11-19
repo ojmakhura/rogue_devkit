@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   proxy:
-    image: traefik:3.0
+    image: traefik:v3
     hostname: traefik
     networks:
       rogue-public:
@@ -19,6 +19,7 @@ services:
       - 1433:1433
       - 6379:6379
       - 9000:9000
+      # - 8761:8761
     healthcheck:
       test: [ "CMD", "wget", "http://localhost:8082/ping","--spider" ]
       interval: 10s
@@ -27,9 +28,11 @@ services:
       start_period: 5s
     command:
       - "--api.insecure=true"
+      # - "--providers.docker.swarmMode=true"
       - "--providers.swarm=true"
       - "--providers.swarm.exposedbydefault=false"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker=false"
+      # - "--providers.docker.exposedbydefault=false"
       - "--providers.file.directory=/etc/traefik/dynamic_conf/"
       - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
@@ -39,6 +42,7 @@ services:
       # - "--entrypoints.mysql-replica.address=:3306"
       # - "--entrypoints.phpmyadmin.address=:80"
       - "--entrypoints.postgres.address=:5432"
+      - "--entrypoints.eureka.address=:8761"
       - "--entrypoints.oracle-db.address=:1521"
       - "--entrypoints.mssql.address=:1433"
       - "--entrypoints.registry.address=:5000"
@@ -56,7 +60,7 @@ services:
       - "--ping.entrypoint=ping"
       - "--metrics"
       - "--metrics.prometheus"
-      - "--providers.docker.network=rogue-public"
+      # - "--providers.docker.network=rogue-public"
       
     deploy:
       placement:

@@ -5,7 +5,7 @@ services:
   ###############################################################################
   postgres-db:
     hostname: db
-    image: bitnami/postgresql:16
+    image: bitnamilegacy/postgresql:16
     volumes:
       - ${ROGUE_DATA}/postgres:/bitnami/postgresql
     environment:

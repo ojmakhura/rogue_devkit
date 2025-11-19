@@ -4,7 +4,7 @@ services:
   # Minio Server
   ###############################################################################
   minio:
-    image: bitnami/minio:latest
+    image: bitnamilegacy/minio:latest
     hostname: minio
     volumes:
      - ${ROGUE_DATA}/minio:/bitnami/minio/data
