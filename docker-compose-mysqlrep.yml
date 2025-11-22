@@ -14,8 +14,8 @@ services:
       - MYSQL_PASSWORD=openmrs
       - MYSQL_DATABASE=openmrs
     volumes:
-      - /home/junior/docker/rogue/mysql/primary2:/bitnami/mysql
-      - /home/junior/docker/rogue/mysql/init:/docker-entrypoint-initdb.d
+      - /home/junior/docker/rogue/mysql/primaryx:/bitnami/mysql
+      - /home/junior/docker/rogue/mysql/init2:/docker-entrypoint-initdb.d
     ports:
       - "3306"
     networks:
@@ -40,7 +40,7 @@ services:
       - MYSQL_MASTER_HOST=mysql-primary
       - MYSQL_MASTER_ROOT_PASSWORD=openmrs
     volumes:
-      - /home/junior/docker/rogue/mysql/replica2:/bitnami/mysql
+      - /home/junior/docker/rogue/mysql/replicax:/bitnami/mysql
     ports:
       - "3306"
     networks:
