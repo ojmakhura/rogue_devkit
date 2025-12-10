@@ -194,7 +194,7 @@ services:
         # - traefik.http.routers.swarmprom-unsee-https.middlewares=swarmprom-unsee-auth
 
   node-exporter:
-    image: bitnami/node-exporter:1.7.0
+    image: quay.io/prometheus/node-exporter:latest
     command:
       - '--path.sysfs=/host/sys'
       - '--path.procfs=/host/proc'
@@ -224,7 +224,7 @@ services:
       - net
 
   prometheus:
-    image: bitnami/prometheus:2.49.1
+    image: prom/prometheus:v3.7.3
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--log.level=error'
