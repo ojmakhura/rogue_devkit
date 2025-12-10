@@ -6,12 +6,12 @@ services:
   keycloak:
     image: bitnamilegacy/keycloak:26
     hostname: keycloak
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:9000/health/ready"]
-      interval: 5s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
+    # healthcheck:
+    #   test: ["CMD", "curl", "--fail", "http://localhost:9000/health/ready"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 15s
     environment:
       KEYCLOAK_DATABASE_USER: ${POSTGRES_USER}
       KEYCLOAK_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}

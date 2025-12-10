@@ -1,9 +1,9 @@
 version: "3.9"
 services:
   redis: 
-    image: bitnamilegacy/redis:7.4.2
+    image: redis:8-alpine
     volumes:
-      - ${ROGUE_DATA}/redis:/bitnami/redis/data
+      - ${ROGUE_DATA}/redis:/data
     environment:
       ALLOW_EMPTY_PASSWORD: ${ALLOW_EMPTY_PASSWORD}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
