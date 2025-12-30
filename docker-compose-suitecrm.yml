@@ -1,0 +1,46 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Keycloak authentication server
+  ###############################################################################
+  suitecrm:
+    image: bitnamilegacy/suitecrm:8
+   #  healthcheck:
+   #    test: ["CMD", "curl", "--fail", "http://localhost:9000/health/ready"]
+   #    interval: 5s
+   #    timeout: 5s
+   #    retries: 3
+   #    start_period: 15s
+    volumes:
+      - ${ROGUE_DATA}/suitecrm:/bitnami/suitecrm
+    environment:
+      SUITECRM_DATABASE_USER: ${MARIADB_USER}
+      SUITECRM_DATABASE_PASSWORD: ${MARIADB_PASSWORD}
+      SUITECRM_DATABASE_NAME: ${SUITECRM_DB}
+      SUITECRM_DATABASE_HOST: mariadb
+      TZ: Africa/Gaborone
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rogue_suitecrm == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.suitecrm-http.rule=Host(`${SUITECRM_DOMAIN}`)"
+        - "traefik.http.routers.suitecrm-http.entrypoints=web"
+        - "traefik.http.routers.suitecrm-http.middlewares=https-redirect"
+        - "traefik.http.services.suitecrm.loadbalancer.server.port=8080"
+        - "traefik.http.routers.suitecrm-https.entrypoints=websecure"
+        - "traefik.http.routers.suitecrm-https.rule=Host(`${SUITECRM_DOMAIN}`)"
+        - "traefik.http.routers.suitecrm-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.suitecrm-https.tls.certresolver=le"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

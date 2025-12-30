@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  mariadb:
+    image: 'grafana/otel-lgtm:latest'
+    networks:
+      rogue-public:
+    volumes:
+      - ${ROGUE_DATA}/otel/data:/data
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_db == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.otel-http.rule=Host(`${OTEL_DOMAIN}`)"
+        - "traefik.http.routers.otel-http.entrypoints=${WEB_ENTRY}"
+        - "traefik.http.routers.otel-http.middlewares=https-redirect"
+        - "traefik.http.routers.otel-https.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.otel-https.rule=Host(`${OTEL_DOMAIN}`)"
+        - "traefik.http.routers.otel-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.otel-https.tls.certresolver=le"
+        - "traefik.http.services.otel.loadbalancer.server.port=3000"
+  
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Minio Server
+  ###############################################################################
+  solr:
+    image: ojmakhura/solr:9.8.1
+    hostname: solr
+    volumes:
+     - ${ROGUE_DATA}/solr:/var/solr
+    #  - ${ROGUE_DATA}/solr/mycore:/var/solr/data/mycore:ro
+    environment:
+      SOLR_ADMIN_USERNAME: ${SOLR_ADMIN_USERNAME}
+      SOLR_ADMIN_PASSWORD: ${SOLR_ADMIN_PASSWORD}
+      TZ: Africa/Gaborone
+    command:
+      - solr-precreate
+      - financialservices
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_solr == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - traefik.http.routers.solr-https.rule=Host(`${SOLR_DOMAIN}`)
+        - traefik.http.routers.solr-https.entrypoints=websecure
+        - traefik.http.routers.solr-https.service=solr
+        - traefik.http.routers.solr-https.tls=true
+        - traefik.http.routers.solr-http.rule=Host(`${SOLR_DOMAIN}`)
+        - traefik.http.routers.solr-http.entrypoints=web
+        - traefik.http.routers.solr-http.middlewares=https-redirect
+        - traefik.http.routers.solr-http.service=solr
+        - traefik.http.services.solr.loadbalancer.server.port=8983
+      
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

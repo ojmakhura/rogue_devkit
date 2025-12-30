@@ -2,7 +2,7 @@ version: '3'
 
 services:
   mysql-primary:
-    image: bitnami/mysql:8.4.5
+    image: bitnamilegacy/mysql:9.4.0
     environment:
       - BITNAMI_DEBUG=true
       - MYSQL_SKIP_INITIALIZATION_ON_RESTART=true  
@@ -28,7 +28,7 @@ services:
           - node.labels.rogue_db == true
 
   mysql-replica:
-    image: bitnami/mysql:8.4.5
+    image: bitnamilegacy/mysql:9.4.0
     environment:
       - BITNAMI_DEBUG=true
       - MYSQL_SKIP_INITIALIZATION_ON_RESTART=true  

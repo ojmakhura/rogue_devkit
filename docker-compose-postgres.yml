@@ -42,7 +42,7 @@ services:
         - "traefik.tcp.services.rogue-db.loadbalancer.server.port=5432"
 
   postgres-exporter:
-    image: bitnami/postgres-exporter:latest
+    image: bitnamilegacy/postgres-exporter:latest
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
       # - DATA_SOURCE_USER=bocraportal

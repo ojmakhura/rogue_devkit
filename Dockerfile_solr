@@ -1,0 +1,7 @@
+FROM solr:9.8.1
+
+USER root
+COPY deployment/solr/*.jar /opt/solr/server/solr-webapp/webapp/WEB-INF/lib/
+USER solr
+
+EXPOSE 8983
