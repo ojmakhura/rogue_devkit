@@ -38,7 +38,7 @@ services:
       KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
       KC_PROXY_HEADERS: xforwarded # Recommended when running behind a reverse proxy
-      KC_HEALTH_ENABLED: true
+      KC_HEALTH_ENABLED: "true"
       TZ: Africa/Gaborone
     command: [ "${KEYCLOAK_START}" ] 
     networks:
