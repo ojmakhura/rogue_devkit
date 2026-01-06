@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  mariadb:
+  otel:
     image: 'grafana/otel-lgtm:latest'
     networks:
       rogue-public:

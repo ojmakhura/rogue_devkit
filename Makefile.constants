@@ -139,3 +139,6 @@ ALLOW_EMPTY_PASSWORD=no
 REDIS_PASSWORD=Chophie5
 
 # Odoo
+
+#Open Telemetry grafana
+ROGUE_OTEL_DOMAIN=otel
