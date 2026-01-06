@@ -4,7 +4,8 @@ services:
   # Keycloak authentication server
   ###############################################################################
   keycloak:
-    image: bitnamilegacy/keycloak:26
+    image: quay.io/keycloak/keycloak:latest
+    # image: bitnamilegacy/keycloak:26
     hostname: keycloak
     # healthcheck:
     #   test: ["CMD", "curl", "--fail", "http://localhost:9000/health/ready"]
@@ -12,21 +13,34 @@ services:
     #   timeout: 5s
     #   retries: 3
     #   start_period: 15s
+    # environment:
+    #   KEYCLOAK_DATABASE_USER: ${POSTGRES_USER}
+    #   KEYCLOAK_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+    #   KEYCLOAK_DATABASE_NAME: ${KEYCLOAK_DB}
+    #   KEYCLOAK_DATABASE_HOST: postgres-db
+    #   KC_HOSTNAME: ${KEYCLOAK_DOMAIN}
+    #   KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
+    #   KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
+    #   PROXY_ADDRESS_FORWARDING: "false"
+    #   KC_HOSTNAME_STRICT_HTTPS: "false"
+    #   KEYCLOAK_ENABLE_HEALTH_ENDPOINTS: "true"
+    #   KEYCLOAK_ENABLE_STATISTICS: "true"
+    #   KEYCLOAK_PROXY_HEADERS: "xforwarded"
+    #   KEYCLOAK_PRODUCTION: "true"
+    #   TZ: Africa/Gaborone
+
     environment:
-      KEYCLOAK_DATABASE_USER: ${POSTGRES_USER}
-      KEYCLOAK_DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
-      KEYCLOAK_DATABASE_NAME: ${KEYCLOAK_DB}
-      KEYCLOAK_DATABASE_HOST: postgres-db
-      KC_HOSTNAME: ${KEYCLOAK_DOMAIN}
+      KC_DB: postgres-db
+      KC_DB_URL: jdbc:postgresql://postgres-db/${KEYCLOAK_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_HOSTNAME: ${KEYCLOAK_DOMAIN} # Use a proper domain name in a real production environment
       KEYCLOAK_ADMIN: ${KEYCLOAK_USER}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
-      PROXY_ADDRESS_FORWARDING: "false"
-      KC_HOSTNAME_STRICT_HTTPS: "false"
-      KEYCLOAK_ENABLE_HEALTH_ENDPOINTS: "true"
-      KEYCLOAK_ENABLE_STATISTICS: "true"
-      KEYCLOAK_PROXY_HEADERS: "xforwarded"
-      KEYCLOAK_PRODUCTION: "true"
+      KC_PROXY_HEADERS: xforwarded # Recommended when running behind a reverse proxy
+      KC_HEALTH_ENABLED: true
       TZ: Africa/Gaborone
+    command: [ "${KEYCLOAK_START}" ] 
     networks:
       rogue-public:
     deploy:
