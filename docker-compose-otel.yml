@@ -24,7 +24,7 @@ services:
         - "traefik.http.routers.otel-https.rule=Host(`${OTEL_DOMAIN}`)"
         - "traefik.http.routers.otel-https.tls=${SSL_SECURE}"
         - "traefik.http.routers.otel-https.tls.certresolver=le"
-        - "traefik.http.services.otel.loadbalancer.server.port=3000"
+        - "traefik.http.services.otel.loadbalancer.server.port=4318"
   
 ###############################################################################
 # Networks
