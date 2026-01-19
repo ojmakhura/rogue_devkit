@@ -17,13 +17,24 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=rogue-public"
         - "traefik.constraint-label=rogue-public"
-        - "traefik.http.routers.otel-http.rule=Host(`${OTEL_DOMAIN}`)"
-        - "traefik.http.routers.otel-http.entrypoints=${WEB_ENTRY}"
-        - "traefik.http.routers.otel-http.middlewares=https-redirect"
+        # - "traefik.http.routers.otel-http.rule=Host(`${OTEL_DOMAIN}`)"
+        # - "traefik.http.routers.otel-http.entrypoints=${WEB_ENTRY}"
+        # - "traefik.http.routers.otel-http.middlewares=https-redirect"
+
+        # Grafana UI
+        - "traefik.http.routers.grafana-ui.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.grafana-ui.rule=Host(`${OTEL_DOMAIN}`)"
+        - "traefik.http.routers.grafana-ui.tls=${SSL_SECURE}"
+        - "traefik.http.routers.grafana-ui.tls.certresolver=le"
+        - "traefik.http.routers.grafana-ui.service=grafana-ui"
+        - "traefik.http.services.grafana-ui.loadbalancer.server.port=3000"
+
+        # OTLP Endpoints
         - "traefik.http.routers.otel-https.entrypoints=${WEBSECURE_ENTRY}"
-        - "traefik.http.routers.otel-https.rule=Host(`${OTEL_DOMAIN}`)"
+        - "traefik.http.routers.otel-https.rule=Host(`${OTEL_DOMAIN}`) && (PathPrefix(`/v1/traces`) || PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/logs`))"
         - "traefik.http.routers.otel-https.tls=${SSL_SECURE}"
         - "traefik.http.routers.otel-https.tls.certresolver=le"
+        - "traefik.http.routers.otel-https.service=otel"
         - "traefik.http.services.otel.loadbalancer.server.port=4318"
   
 ###############################################################################

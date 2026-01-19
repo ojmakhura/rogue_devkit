@@ -5,7 +5,7 @@ services:
   ###############################################################################
   postgres-db:
     hostname: db
-    image: postgres:18
+    image: postgres:18.1
     volumes:
       - ${ROGUE_DATA}/postgres:/var/lib/postgresql
     environment:
