@@ -7,6 +7,8 @@ services:
       rogue-public:
     volumes:
       - ${ROGUE_DATA}/otel/data:/data
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=false
     deploy:
       placement:
         constraints:

@@ -4,7 +4,7 @@ services:
   # Rabbit MQ
   ###############################################################################
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:4.2-management
     container_name: rogue-rabbitmq
     hostname: rabbitmq
     # volumes:
