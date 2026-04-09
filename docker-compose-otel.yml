@@ -4,9 +4,9 @@ services:
   otel:
     image: 'grafana/otel-lgtm:latest'
     networks:
-      rogue-public:
+      bipacs-public:
     volumes:
-      - ${ROGUE_DATA}/otel/data:/data
+      - docker/otel/data:/data
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=false
     deploy:
@@ -14,27 +14,24 @@ services:
         constraints:
           # Make the traefik service run only on the node with this label
           # as the node with it has the volume for the certificates
-          - node.labels.rogue_db == true
+          - node.labels.bipacs_db == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
-        # - "traefik.http.routers.otel-http.rule=Host(`${OTEL_DOMAIN}`)"
-        # - "traefik.http.routers.otel-http.entrypoints=${WEB_ENTRY}"
-        # - "traefik.http.routers.otel-http.middlewares=https-redirect"
+        - "traefik.docker.network=bipacs-public"
+        - "traefik.constraint-label=bipacs-public"
 
         # Grafana UI
-        - "traefik.http.routers.grafana-ui.entrypoints=${WEBSECURE_ENTRY}"
-        - "traefik.http.routers.grafana-ui.rule=Host(`${OTEL_DOMAIN}`)"
-        - "traefik.http.routers.grafana-ui.tls=${SSL_SECURE}"
+        - "traefik.http.routers.grafana-ui.entrypoints=web"
+        - "traefik.http.routers.grafana-ui.rule=Host(`bipacsotel.bitri-ist.co.bw`)"
+        - "traefik.http.routers.grafana-ui.tls=true"
         - "traefik.http.routers.grafana-ui.tls.certresolver=le"
         - "traefik.http.routers.grafana-ui.service=grafana-ui"
         - "traefik.http.services.grafana-ui.loadbalancer.server.port=3000"
 
         # OTLP Endpoints
-        - "traefik.http.routers.otel-https.entrypoints=${WEBSECURE_ENTRY}"
-        - "traefik.http.routers.otel-https.rule=Host(`${OTEL_DOMAIN}`) && (PathPrefix(`/v1/traces`) || PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/logs`))"
-        - "traefik.http.routers.otel-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.otel-https.entrypoints=websecure"
+        - "traefik.http.routers.otel-https.rule=Host(`bipacsotel.bitri-ist.co.bw`) && (PathPrefix(`/v1/traces`) || PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/logs`))"
+        - "traefik.http.routers.otel-https.tls=true"
         - "traefik.http.routers.otel-https.tls.certresolver=le"
         - "traefik.http.routers.otel-https.service=otel"
         - "traefik.http.services.otel.loadbalancer.server.port=4318"
@@ -43,5 +40,5 @@ services:
 # Networks
 ###############################################################################
 networks:
-  rogue-public:
+  bipacs-public:
     external: true

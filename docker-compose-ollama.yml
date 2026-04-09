@@ -1,0 +1,90 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Postgres administration frontend
+  ###############################################################################
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ${ROGUE_DATA}/ollama:/root/.ollama
+    ports:
+      - 11434:11434
+    environment:
+      # POSTGRES_POSTGRES_PASSWORD: ${POSTGRES_USER_PASSWORD}
+      # POSTGRES_USER: ${POSTGRES_USER}
+      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # POSTGRES_DATABASE: ${POSTGRES_DB}
+      # POSTGRES_MAX_CONNECTIONS: 100
+      TZ: Africa/Gaborone
+    # depends_on:
+    #   proxy:
+    #     condition: service_healthy
+    # healthcheck:
+    #   test: ["CMD", "/opt/bitnami/postgresql/bin/pg_isready", "--username=postgres"]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 5
+    networks:
+      rogue-public:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_ollama == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.tcp.routers.rogue-ollama.rule=HostSNI(`*`)"
+        - "traefik.tcp.routers.rogue-ollama.entrypoints=postgres"
+        - "traefik.tcp.routers.rogue-ollama.service=rogue-ollama"
+        - "traefik.tcp.services.rogue-ollama.loadbalancer.server.port=11434"
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    networks:
+      rogue-public:
+    # depends_on:
+      # proxy:
+      #   condition: service_healthy
+      # db:
+      #  condition: service_healthy
+    # volumes:
+    #   - ${ROGUE_DATA}/open-webui:/var/lib/open-webui
+    ports:
+      - 8080
+    environment:
+      # PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      # PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      # SCRIPT_NAME: /pgadmin
+      TZ: Africa/Gaborone
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_ollama == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.rogue-open-webui-http.rule=Host(`${WEBUI_DOMAIN}`)"
+        - "traefik.http.routers.rogue-open-webui-http.entrypoints=web"
+        - "traefik.http.routers.rogue-open-webui-http.middlewares=https-redirect"
+        - "traefik.http.services.rogue-open-webui.loadbalancer.server.port=8080"
+        - "traefik.http.routers.rogue-open-webui-https.entrypoints=websecure"
+        - "traefik.http.routers.rogue-open-webui-https.rule=Host(`${WEBUI_DOMAIN}`)"
+        - "traefik.http.routers.rogue-open-webui-https.tls=true"
+        - "traefik.http.routers.rogue-open-webui-https.tls.certresolver=le"
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true
