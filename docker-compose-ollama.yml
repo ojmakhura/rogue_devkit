@@ -9,34 +9,19 @@ services:
       - ${ROGUE_DATA}/ollama:/root/.ollama
     ports:
       - 11434:11434
+    devices:
+      - /dev/nvidia0:/dev/nvidia0
+      - /dev/nvidiactl:/dev/nvidiactl
+      - /dev/nvidia-uvm:/dev/nvidia-uvm
     environment:
-      # POSTGRES_POSTGRES_PASSWORD: ${POSTGRES_USER_PASSWORD}
-      # POSTGRES_USER: ${POSTGRES_USER}
-      # POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      # POSTGRES_DATABASE: ${POSTGRES_DB}
-      # POSTGRES_MAX_CONNECTIONS: 100
       TZ: Africa/Gaborone
-    # depends_on:
-    #   proxy:
-    #     condition: service_healthy
-    # healthcheck:
-    #   test: ["CMD", "/opt/bitnami/postgresql/bin/pg_isready", "--username=postgres"]
-    #   interval: 5s
-    #   timeout: 5s
-    #   retries: 5
     networks:
       rogue-public:
     deploy:
       resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+        reservations: {}
       placement:
         constraints:
-          # Make the traefik service run only on the node with this label
-          # as the node with it has the volume for the certificates
           - node.labels.rogue_ollama == true
       labels:
         - "traefik.enable=true"
@@ -49,25 +34,18 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     networks:
       rogue-public:
-    # depends_on:
-      # proxy:
-      #   condition: service_healthy
-      # db:
-      #  condition: service_healthy
-    # volumes:
-    #   - ${ROGUE_DATA}/open-webui:/var/lib/open-webui
+    volumes:
+      - ${ROGUE_DATA}/open-webui/ui:/var/lib/open-webui
+      - ${ROGUE_DATA}/open-webui/backend:/app/backend/data
     ports:
       - 8080
     environment:
-      # PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      # PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-      # SCRIPT_NAME: /pgadmin
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_API_BASE_URL: http://ollama:11434
       TZ: Africa/Gaborone
     deploy:
       placement:
         constraints:
-          # Make the traefik service run only on the node with this label
-          # as the node with it has the volume for the certificates
           - node.labels.rogue_ollama == true
       labels:
         - "traefik.enable=true"

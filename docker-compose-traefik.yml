@@ -34,7 +34,7 @@ services:
       - "--entrypoints.mariadb.address=:3306"
       # - "--entrypoints.mysql-primary.address=:3306"
       # - "--entrypoints.mysql-replica.address=:3306"
-      # - "--entrypoints.phpmyadmin.address=:80"
+      - "--entrypoints.ollama.address=:11434"
       - "--entrypoints.postgres.address=:5432"
       - "--entrypoints.eureka.address=:8761"
       - "--entrypoints.oracle-db.address=:1521"
