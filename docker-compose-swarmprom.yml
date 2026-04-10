@@ -9,6 +9,7 @@ networks:
 
 volumes:
     prometheus: {}
+    prometheus_data: {}
     grafana: {}
     alertmanager: {}
 
@@ -224,7 +225,7 @@ services:
       - net
 
   prometheus:
-    image: prom/prometheus:v3.7.3
+    image: prom/prometheus:v3.8.1
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--log.level=error'
@@ -251,12 +252,8 @@ services:
         # - traefik.http.middlewares.swarmprom-prometheus-auth.basicauth.usersfile=/var/system_passwd
         # - traefik.http.routers.swarmprom-prometheus-https.middlewares=swarmprom-prometheus-auth
     volumes:
-      - type: bind
-        source: ${ROGUE_DATA}/prometheus/data
-        target: /prometheus
-      - type: bind
-        source: ${ROGUE_DATA}/prometheus/prometheus.yml
-        target: /etc/prometheus/prometheus.yml
+      - ${ROGUE_DATA}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
       # - type: bind
         # source: ${ROGUE_DATA}/hosts
         # target: /etc/hosts

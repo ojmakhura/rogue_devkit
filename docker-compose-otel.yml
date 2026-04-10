@@ -33,8 +33,21 @@ services:
         - "traefik.http.routers.otel-https.rule=Host(`bipacsotel.bitri-ist.co.bw`) && (PathPrefix(`/v1/traces`) || PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/logs`))"
         - "traefik.http.routers.otel-https.tls=true"
         - "traefik.http.routers.otel-https.tls.certresolver=le"
-        - "traefik.http.routers.otel-https.service=otel"
-        - "traefik.http.services.otel.loadbalancer.server.port=4318"
+        - "traefik.http.routers.otel-https.service=otel"                    # <-- add this
+        - "traefik.http.services.otel.loadbalancer.server.port=3000"
+
+        # -------- OTEL METRICS --------
+        - "traefik.http.routers.otel-metrics-http.rule=Host(`${OTEL_METRICS_DOMAIN}`) && PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/traces`) || PathPrefix(`/v1/logs`)"
+        - "traefik.http.routers.otel-metrics-http.entrypoints=${WEB_ENTRY}"
+        - "traefik.http.routers.otel-metrics-http.middlewares=https-redirect"
+        - "traefik.http.routers.otel-metrics-http.service=otel-metrics"     # <-- add this
+
+        - "traefik.http.routers.otel-metrics-https.entrypoints=${WEBSECURE_ENTRY}"
+        - "traefik.http.routers.otel-metrics-https.rule=Host(`${OTEL_METRICS_DOMAIN}`) && PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/traces`) || PathPrefix(`/v1/logs`)"
+        - "traefik.http.routers.otel-metrics-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.otel-metrics-https.tls.certresolver=le"
+        - "traefik.http.routers.otel-metrics-https.service=otel-metrics"    # <-- add this
+        - "traefik.http.services.otel-metrics.loadbalancer.server.port=4318"
   
 ###############################################################################
 # Networks

@@ -7,9 +7,9 @@ services:
     image: rabbitmq:4.2-management
     container_name: rogue-rabbitmq
     hostname: rabbitmq
-    # volumes:
-    #  - ${BOCRA_DATA}/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-    #  - ${BOCRA_DATA}/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    volumes:
+     - ${ROGUE_DATA}/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+    #  - ${ROGUE_DATA}/rabbitmq/enabled_plugins:/etc/rabbitmq/enabled_plugins
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
