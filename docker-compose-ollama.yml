@@ -5,26 +5,27 @@ services:
   ###############################################################################
   ollama:
     image: ollama/ollama
+    restart: unless-stopped
     volumes:
       - ${ROGUE_DATA}/ollama:/root/.ollama
     ports:
       - 11434:11434
-    devices:
-      - /dev/nvidia0:/dev/nvidia0
-      - /dev/nvidiactl:/dev/nvidiactl
-      - /dev/nvidia-uvm:/dev/nvidia-uvm
     environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
       TZ: Africa/Gaborone
     networks:
       rogue-public:
-    device_requests:
-      - driver: nvidia
-        count: all
-        capabilities: [gpu]
     deploy:    
       placement:
         constraints:
           - node.labels.rogue_ollama == true
+      resources:
+        reservations:
+          generic_resources:
+            - discrete_resource_spec:
+                kind: 'NVIDIA-GPU'
+                #value: 1  # Number of GPUs to reserve
       labels:
         - "traefik.enable=true"
         - "traefik.tcp.routers.rogue-ollama.rule=HostSNI(`*`)"
@@ -32,35 +33,35 @@ services:
         - "traefik.tcp.routers.rogue-ollama.service=rogue-ollama"
         - "traefik.tcp.services.rogue-ollama.loadbalancer.server.port=11434"
 
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    networks:
-      rogue-public:
-    volumes:
-      - ${ROGUE_DATA}/open-webui/ui:/var/lib/open-webui
-      - ${ROGUE_DATA}/open-webui/backend:/app/backend/data
-    ports:
-      - 8080
-    environment:
-      OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_API_BASE_URL: http://ollama:11434
-      TZ: Africa/Gaborone
-    deploy:
-      placement:
-        constraints:
-          - node.labels.rogue_ollama == true
-      labels:
-        - "traefik.enable=true"
-        - "traefik.docker.network=rogue-public"
-        - "traefik.constraint-label=rogue-public"
-        - "traefik.http.routers.rogue-open-webui-http.rule=Host(`${WEBUI_DOMAIN}`)"
-        - "traefik.http.routers.rogue-open-webui-http.entrypoints=web"
-        - "traefik.http.routers.rogue-open-webui-http.middlewares=https-redirect"
-        - "traefik.http.services.rogue-open-webui.loadbalancer.server.port=8080"
-        - "traefik.http.routers.rogue-open-webui-https.entrypoints=websecure"
-        - "traefik.http.routers.rogue-open-webui-https.rule=Host(`${WEBUI_DOMAIN}`)"
-        - "traefik.http.routers.rogue-open-webui-https.tls=true"
-        - "traefik.http.routers.rogue-open-webui-https.tls.certresolver=le"
+  # open-webui:
+  #   image: ghcr.io/open-webui/open-webui:main
+  #   networks:
+  #     rogue-public:
+  #   volumes:
+  #     - ${ROGUE_DATA}/open-webui/ui:/var/lib/open-webui
+  #     - ${ROGUE_DATA}/open-webui/backend:/app/backend/data
+  #   ports:
+  #     - 8080
+  #   environment:
+  #     OLLAMA_BASE_URL: http://ollama:11434
+  #     OLLAMA_API_BASE_URL: http://ollama:11434
+  #     TZ: Africa/Gaborone
+  #   deploy:
+  #     placement:
+  #       constraints:
+  #         - node.labels.rogue_ollama == true
+  #     labels:
+  #       - "traefik.enable=true"
+  #       - "traefik.docker.network=rogue-public"
+  #       - "traefik.constraint-label=rogue-public"
+  #       - "traefik.http.routers.rogue-open-webui-http.rule=Host(`${WEBUI_DOMAIN}`)"
+  #       - "traefik.http.routers.rogue-open-webui-http.entrypoints=web"
+  #       - "traefik.http.routers.rogue-open-webui-http.middlewares=https-redirect"
+  #       - "traefik.http.services.rogue-open-webui.loadbalancer.server.port=8080"
+  #       - "traefik.http.routers.rogue-open-webui-https.entrypoints=websecure"
+  #       - "traefik.http.routers.rogue-open-webui-https.rule=Host(`${WEBUI_DOMAIN}`)"
+  #       - "traefik.http.routers.rogue-open-webui-https.tls=true"
+  #       - "traefik.http.routers.rogue-open-webui-https.tls.certresolver=le"
 
 ###############################################################################
 # Networks
