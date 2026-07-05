@@ -27,6 +27,12 @@ up_proxy: gen_env
 down_proxy: gen_env
 	chmod 755 .env && . ./.env && docker stack rm ${STACK_NAME}-proxy
 
+up_novu: gen_env
+	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-novu.yml ${STACK_NAME}-novu
+
+down_novu: gen_env
+	chmod 755 .env && . ./.env && docker stack rm ${STACK_NAME}-novu
+
 up_service: gen_env
 	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-${service}.yml ${STACK_NAME}-${service}
 

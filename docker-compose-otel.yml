@@ -4,54 +4,51 @@ services:
   otel:
     image: 'grafana/otel-lgtm:latest'
     networks:
-      bipacs-public:
+      rogue-public:
     volumes:
-      - docker/otel/data:/data
+      - ${ROGUE_DATA}/otel/data:/data
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=false
     deploy:
       placement:
         constraints:
-          # Make the traefik service run only on the node with this label
-          # as the node with it has the volume for the certificates
-          - node.labels.bipacs_db == true
+          - node.labels.rogue_db == true
       labels:
         - "traefik.enable=true"
-        - "traefik.docker.network=bipacs-public"
-        - "traefik.constraint-label=bipacs-public"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
 
-        # Grafana UI
-        - "traefik.http.routers.grafana-ui.entrypoints=web"
-        - "traefik.http.routers.grafana-ui.rule=Host(`bipacsotel.bitri-ist.co.bw`)"
+        # =========================================================
+        # GRAFANA UI - HTTP → HTTPS REDIRECT
+        # =========================================================
+        - "traefik.http.routers.grafana-ui-http.entrypoints=web"
+        - "traefik.http.routers.grafana-ui-http.rule=Host(`${OTEL_DOMAIN}`)"
+        - "traefik.http.routers.grafana-ui-http.middlewares=https-redirect"
+        - "traefik.http.routers.grafana-ui-http.service=grafana-ui"
+
+        # =========================================================
+        # GRAFANA UI - HTTPS
+        # =========================================================
+        - "traefik.http.routers.grafana-ui.entrypoints=websecure"
+        - "traefik.http.routers.grafana-ui.rule=Host(`${OTEL_DOMAIN}`)"
         - "traefik.http.routers.grafana-ui.tls=true"
         - "traefik.http.routers.grafana-ui.tls.certresolver=le"
         - "traefik.http.routers.grafana-ui.service=grafana-ui"
+
         - "traefik.http.services.grafana-ui.loadbalancer.server.port=3000"
 
-        # OTLP Endpoints
-        - "traefik.http.routers.otel-https.entrypoints=websecure"
-        - "traefik.http.routers.otel-https.rule=Host(`bipacsotel.bitri-ist.co.bw`) && (PathPrefix(`/v1/traces`) || PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/logs`))"
-        - "traefik.http.routers.otel-https.tls=true"
-        - "traefik.http.routers.otel-https.tls.certresolver=le"
-        - "traefik.http.routers.otel-https.service=otel"                    # <-- add this
-        - "traefik.http.services.otel.loadbalancer.server.port=3000"
+        # ---------------- OTEL (SINGLE ROUTER ONLY) ----------------
+        - "traefik.http.routers.otel.entrypoints=websecure"
+        - "traefik.http.routers.otel.rule=Host(`${OTEL_METRICS_DOMAIN}`) && (PathPrefix(`/v1/traces`) || PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/logs`))"
+        - "traefik.http.routers.otel.tls=true"
+        - "traefik.http.routers.otel.tls.certresolver=le"
+        - "traefik.http.routers.otel.service=otel"
 
-        # -------- OTEL METRICS --------
-        - "traefik.http.routers.otel-metrics-http.rule=Host(`${OTEL_METRICS_DOMAIN}`) && PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/traces`) || PathPrefix(`/v1/logs`)"
-        - "traefik.http.routers.otel-metrics-http.entrypoints=${WEB_ENTRY}"
-        - "traefik.http.routers.otel-metrics-http.middlewares=https-redirect"
-        - "traefik.http.routers.otel-metrics-http.service=otel-metrics"     # <-- add this
-
-        - "traefik.http.routers.otel-metrics-https.entrypoints=${WEBSECURE_ENTRY}"
-        - "traefik.http.routers.otel-metrics-https.rule=Host(`${OTEL_METRICS_DOMAIN}`) && PathPrefix(`/v1/metrics`) || PathPrefix(`/v1/traces`) || PathPrefix(`/v1/logs`)"
-        - "traefik.http.routers.otel-metrics-https.tls=${SSL_SECURE}"
-        - "traefik.http.routers.otel-metrics-https.tls.certresolver=le"
-        - "traefik.http.routers.otel-metrics-https.service=otel-metrics"    # <-- add this
-        - "traefik.http.services.otel-metrics.loadbalancer.server.port=4318"
+        - "traefik.http.services.otel.loadbalancer.server.port=4318"
   
 ###############################################################################
 # Networks
 ###############################################################################
 networks:
-  bipacs-public:
+  rogue-public:
     external: true
