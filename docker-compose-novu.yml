@@ -31,8 +31,43 @@ services:
       timeout: 5s
       retries: 5
       start_period: 20s
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rogue_novu == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
     networks:
       rogue-public:
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
+    networks:
+      - rogue-public
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.mongoexpress-http.rule=Host(`${MONGO_DOMAIN}`)"
+        - "traefik.http.routers.mongoexpress-http.entrypoints=web"
+        - "traefik.http.routers.mongoexpress-http.middlewares=https-redirect"
+        - "traefik.http.routers.mongoexpress-http.service=mongoexpress"
+        - "traefik.http.routers.mongoexpress-https.entrypoints=websecure"
+        - "traefik.http.routers.mongoexpress-https.rule=Host(`${MONGO_DOMAIN}`)"
+        - "traefik.http.routers.mongoexpress-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.mongoexpress-https.tls.certresolver=le"
+        - "traefik.http.routers.mongoexpress-https.service=mongoexpress"
+        - "traefik.http.services.mongoexpress.loadbalancer.server.port=8081"
 
   novu-api:
     image: "ghcr.io/novuhq/novu/api:3.17.0"
@@ -152,7 +187,7 @@ services:
       NEW_RELIC_LICENSE_KEY: ${NEW_RELIC_LICENSE_KEY}
       BROADCAST_QUEUE_CHUNK_SIZE: ${BROADCAST_QUEUE_CHUNK_SIZE}
       MULTICAST_QUEUE_CHUNK_SIZE: ${MULTICAST_QUEUE_CHUNK_SIZE}
-      API_ROOT_URL: http://${ROGUE_NOVU_API_SUBDOMAIN}:${NOVU_API_PORT}
+      API_ROOT_URL: ${INTERNAL_API_ROOT_URL}
       IS_EMAIL_INLINE_CSS_DISABLED: ${IS_EMAIL_INLINE_CSS_DISABLED}
       IS_USE_MERGED_DIGEST_ID_ENABLED: ${IS_USE_MERGED_DIGEST_ID_ENABLED}
     networks:

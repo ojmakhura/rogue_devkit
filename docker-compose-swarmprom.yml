@@ -91,9 +91,11 @@ services:
         - traefik.enable=true
         - traefik.docker.network=rogue-public
         - traefik.constraint-label=rogue-public
+
         - traefik.http.routers.swarmprom-grafana-http.rule=Host(`${GRAFANA_DOMAIN}`)
         - traefik.http.routers.swarmprom-grafana-http.entrypoints=web
         - traefik.http.routers.swarmprom-grafana-http.middlewares=https-redirect
+        
         - traefik.http.routers.swarmprom-grafana-https.rule=Host(`${GRAFANA_DOMAIN}`)
         - traefik.http.routers.swarmprom-grafana-https.entrypoints=websecure
         - traefik.http.routers.swarmprom-grafana-https.tls=${SSL_SECURE}

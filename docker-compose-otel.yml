@@ -8,10 +8,19 @@ services:
     volumes:
       - ${ROGUE_DATA}/otel/data:/data
     environment:
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_PLUGINS_ENABLE_ALPHA=true
+      - GF_ALLOW_EMBEDDING=true
+      - GF_grafanaconThemes=true
+      - ENABLE_LOGS_GRAFANA=true
+      - GF_FEATURE_TOGGLES_ENABLE=provisioning,kubernetesDashboards
       - GF_AUTH_ANONYMOUS_ENABLED=false
+      - TZ=Africa/Gaborone
     deploy:
       placement:
         constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
           - node.labels.rogue_db == true
       labels:
         - "traefik.enable=true"

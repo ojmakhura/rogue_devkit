@@ -8,7 +8,8 @@ services:
       - ${ROGUE_DATA}/odoo/web-data:/var/lib/odoo
       - ${ROGUE_DATA}/odoo/config:/etc/odoo
       - ${ROGUE_DATA}/odoo/addons:/mnt/extra-addons
-      - ${ROGUE_DATA}/odoo/hosts:/etc/hosts
+      # - ${ROGUE_DATA}/odoo/hosts:/etc/hosts
+      - /etc/hosts:/etc/hosts
     environment:
       - HOST=postgres-db
       - USER=${POSTGRES_USER}

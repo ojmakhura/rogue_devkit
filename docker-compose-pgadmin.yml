@@ -33,13 +33,15 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=rogue-public"
         - "traefik.constraint-label=rogue-public"
+
         - "traefik.http.routers.rogue-pgadmin-http.rule=Host(`${PGADMIN_DOMAIN}`)"
         - "traefik.http.routers.rogue-pgadmin-http.entrypoints=web"
         - "traefik.http.routers.rogue-pgadmin-http.middlewares=https-redirect"
         - "traefik.http.services.rogue-pgadmin.loadbalancer.server.port=80"
+        
         - "traefik.http.routers.rogue-pgadmin-https.entrypoints=websecure"
         - "traefik.http.routers.rogue-pgadmin-https.rule=Host(`${PGADMIN_DOMAIN}`)"
-        - "traefik.http.routers.rogue-pgadmin-https.tls=true"
+        - "traefik.http.routers.rogue-pgadmin-https.tls=${SSL_SECURE}"
         - "traefik.http.routers.rogue-pgadmin-https.tls.certresolver=le"
 
 ###############################################################################
