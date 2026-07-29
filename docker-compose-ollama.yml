@@ -4,7 +4,7 @@ services:
   # Postgres administration frontend
   ###############################################################################
   ollama:
-    image: ollama/ollama
+    image: ollama/ollama:0.20.4
     restart: unless-stopped
     volumes:
       - ${ROGUE_DATA}/ollama:/root/.ollama
