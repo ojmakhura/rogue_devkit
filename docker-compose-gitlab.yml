@@ -1,0 +1,144 @@
+version: "3.9"
+
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    restart: unless-stopped
+    hostname: ${GITLAB_DOMAIN}
+    shm_size: "512m"
+
+    environment:
+      GITLAB_ROOT_PASSWORD: ${GITLAB_DB_PASSWORD}
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.roguedev.local'
+
+        ## Disable bundled services
+        postgresql['enable'] = false
+        redis['enable'] = false
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        letsencrypt['enable'] = false
+        gitlab_rails['initial_root_password'] = 'Cash8Aes'
+
+        #######################################################
+        # PostgreSQL
+        #######################################################
+        gitlab_rails['db_adapter'] = 'postgresql'
+        gitlab_rails['db_encoding'] = 'unicode'
+        gitlab_rails['db_host'] = 'postgres-db'
+        gitlab_rails['db_port'] = 5432
+        gitlab_rails['db_database'] = 'gitlab'
+        gitlab_rails['db_username'] = 'rogueadmin'
+        gitlab_rails['db_password'] = 'Cash8Aes'
+
+        #######################################################
+        # Redis
+        #######################################################
+        gitlab_rails['redis_host'] = 'redis'
+        gitlab_rails['redis_port'] = 6379
+
+        #######################################################
+        # SSH
+        #######################################################
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+
+        #######################################################
+        # Registry (optional)
+        #######################################################
+        registry['enable'] = false
+
+        #######################################################
+        # Packages / LFS / Artifacts
+        #######################################################
+        gitlab_rails['lfs_enabled'] = true
+
+        #######################################################
+        # MINIO Object Storage
+        #######################################################
+
+        gitlab_rails['object_store']['enabled'] = true
+        gitlab_rails['object_store']['proxy_download'] = false
+
+        gitlab_rails['object_store']['connection'] = {
+          'provider' => 'AWS',
+          'region' => 'us-east-1',
+          'endpoint' => 'http://minio:9000',
+          'path_style' => true,
+          'aws_access_key_id' => 'admin',
+          'aws_secret_access_key' => 'O8GoYCiD'
+        }
+
+        gitlab_rails['object_store']['objects']['artifacts']['bucket'] = 'gitlab-artifacts'
+        gitlab_rails['object_store']['objects']['external_diffs']['bucket'] = 'gitlab-external-diffs'
+        gitlab_rails['object_store']['objects']['lfs']['bucket'] = 'gitlab-lfs'
+        gitlab_rails['object_store']['objects']['uploads']['bucket'] = 'gitlab-uploads'
+        gitlab_rails['object_store']['objects']['packages']['bucket'] = 'gitlab-packages'
+        gitlab_rails['object_store']['objects']['terraform_state']['bucket'] = 'gitlab-terraform'
+        gitlab_rails['object_store']['objects']['dependency_proxy']['bucket'] = 'gitlab-dependency-proxy'
+        gitlab_rails['object_store']['objects']['ci_secure_files']['bucket'] = 'gitlab-ci-secure-files'
+
+        #######################################################
+        # Prometheus
+        #######################################################
+        prometheus_monitoring['enable'] = false
+
+        # Expose internal exporters so external Prometheus can reach them
+        node_exporter['enable'] = true
+        node_exporter['listen_address'] = '0.0.0.0:9100'
+        gitlab_exporter['enable'] = true
+        gitlab_exporter['listen_address'] = '0.0.0.0'
+        gitlab_exporter['listen_port'] = '9168'
+
+    volumes:
+      - ${ROGUE_DATA}/gitlab/config:/etc/gitlab
+      - ${ROGUE_DATA}/gitlab/logs:/var/log/gitlab
+      - ${ROGUE_DATA}/gitlab/data:/var/opt/gitlab
+      # Swarm-compatible shared memory allocation (512MB)
+      - type: tmpfs
+        target: /dev/shm
+        tmpfs:
+          size: 536870912
+
+    networks:
+      - rogue-public
+
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_proxy == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        # HTTP redirect router
+        - "traefik.http.routers.rogue-gitlab-http.rule=Host(`${GITLAB_DOMAIN}`)"
+        - "traefik.http.routers.rogue-gitlab-http.entrypoints=web"
+        - "traefik.http.routers.rogue-gitlab-http.middlewares=https-redirect"
+        # HTTPS router
+        - "traefik.http.routers.rogue-gitlab-https.entrypoints=websecure"
+        - "traefik.http.routers.rogue-gitlab-https.rule=Host(`${GITLAB_DOMAIN}`)"
+        - "traefik.http.routers.rogue-gitlab-https.tls=true"
+        - "traefik.http.routers.rogue-gitlab-https.tls.certresolver=le"
+        # Service port mapping
+        - "traefik.http.services.rogue-gitlab.loadbalancer.server.port=80"
+
+  gitlab-runner:
+    image: gitlab/gitlab-runner:latest
+    restart: unless-stopped
+    depends_on:
+      - gitlab
+    privileged: true
+    volumes:
+      - ${ROGUE_DATA}/gitlab/runner:/etc/gitlab-runner
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - rogue-public
+      
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

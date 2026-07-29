@@ -21,6 +21,12 @@ up_keycloak: build_keycloak_image gen_env
 down_keycloak: gen_env
 	chmod 755 .env && . ./.env && docker stack rm ${STACK_NAME}-keycloak
 
+up_gitlab: gen_env
+	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-gitlab.yml ${STACK_NAME}-gitlab
+
+down_gitlab: gen_env
+	chmod 755 .env && . ./.env && docker stack rm ${STACK_NAME}-gitlab
+
 up_proxy: gen_env 
 	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-traefik.yml ${STACK_NAME}-proxy
 
@@ -60,6 +66,10 @@ mount_prep: gen_env
 	mkdir -p ${ROGUE_DATA}/auth && \
 	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \
 	mkdir -p ${ROGUE_DATA}/keycloak && \
+	mkdir -p ${ROGUE_DATA}/gitlab/config && \
+	mkdir -p ${ROGUE_DATA}/gitlab/logs && \
+	mkdir -p ${ROGUE_DATA}/gitlab/data && \
+	mkdir -p ${ROGUE_DATA}/minio && \
 	mkdir -p ${ROGUE_DATA}/certs && \
 	cp deployment/certs/* ${ROGUE_DATA}/certs && \
 	mkdir -p ${ROGUE_DATA}/registry && \
