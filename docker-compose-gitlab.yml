@@ -10,7 +10,7 @@ services:
     environment:
       GITLAB_ROOT_PASSWORD: ${GITLAB_DB_PASSWORD}
       GITLAB_OMNIBUS_CONFIG: |
-        external_url 'https://gitlab.roguedev.local'
+        external_url 'https://gitlab.example.com'
 
         ## Disable bundled services
         postgresql['enable'] = false

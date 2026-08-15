@@ -146,6 +146,8 @@ REDIS_PASSWORD=Chophie5
 
 #Open Telemetry grafana
 ROGUE_OTEL_DOMAIN=otel
+OTEL_ADMIN_USER=admin
+OTEL_ADMIN_PASSWORD=Cash8Aes
 
 # Novu
 ROGUE_NOVU_API_SUBDOMAIN=novu-api

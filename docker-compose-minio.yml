@@ -21,7 +21,7 @@ services:
       # MINIO_CONSOLE_PORT_NUMBER: 9001
       MINIO_BROWSER: "on"
       
-      # MINIO_SERVER_URL: https://minio.roguedev.local
+      # MINIO_SERVER_URL: https://minio.example.com
       BITNAMI_DEBUG: 'true'
       TZ: Africa/Gaborone
     networks:

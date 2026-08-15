@@ -27,11 +27,11 @@ services:
       labels:
         - "traefik.enable=true"
         - "traefik.docker.network=rogue-public"
-        - traefik.http.routers.solr-https.rule=Host(`solr.roguedev.local`)
+        - traefik.http.routers.solr-https.rule=Host(`solr.example.com`)
         - traefik.http.routers.solr-https.entrypoints=websecure
         - traefik.http.routers.solr-https.service=solr
         - traefik.http.routers.solr-https.tls=true
-        - traefik.http.routers.solr-http.rule=Host(`solr.roguedev.local`)
+        - traefik.http.routers.solr-http.rule=Host(`solr.example.com`)
         - traefik.http.routers.solr-http.entrypoints=web
         - traefik.http.routers.solr-http.middlewares=https-redirect
         - traefik.http.routers.solr-http.service=solr

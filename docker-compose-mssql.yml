@@ -23,7 +23,7 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network=rogue-public"
         - "traefik.constraint-label=rogue-public"
-        - "traefik.tcp.routers.rogue-mssql.rule=HostSNI(`mssql.roguedev.local`)"
+        - "traefik.tcp.routers.rogue-mssql.rule=HostSNI(`mssql.example.com`)"
         - "traefik.tcp.routers.rogue-mssql.entrypoints=mssql"
         - "traefik.tcp.routers.rogue-mssql.service=rogue-mssql"
         - "traefik.tcp.routers.rogue-mssql.tls=true"
