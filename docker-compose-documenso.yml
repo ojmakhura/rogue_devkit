@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Documenso document workflow service
+  ###############################################################################
+  documenso:
+    image: documenso/documenso:v2.16.0
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      APP_URL: https://${DOCUMENSO_DOMAIN}
+      NEXTAUTH_URL: https://${DOCUMENSO_DOMAIN}
+      NEXTAUTH_SECRET: ${DOCUMENSO_SECRET}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres-db:5432/${DOCUMENSO_DB}?schema=public
+      REDIS_URL: redis://redis:6379
+      POSTGRES_DB: ${DOCUMENSO_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MAIL_FROM: ${DOCUMENSO_MAIL_FROM}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+      SMTP_SECURE: ${SMTP_SECURE}
+      TZ: Africa/Gaborone
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          - node.labels.rogue_documenso == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.documenso-http.rule=Host(`${DOCUMENSO_DOMAIN}`)"
+        - "traefik.http.routers.documenso-http.entrypoints=web"
+        - "traefik.http.routers.documenso-http.middlewares=https-redirect"
+        - "traefik.http.services.documenso.loadbalancer.server.port=3000"
+        - "traefik.http.routers.documenso-https.entrypoints=websecure"
+        - "traefik.http.routers.documenso-https.rule=Host(`${DOCUMENSO_DOMAIN}`)"
+        - "traefik.http.routers.documenso-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.documenso-https.tls.certresolver=le"
+
+###############################################################################
+# Volumes and networks
+###############################################################################
+volumes:
+  documenso_postgres_data:
+  documenso_redis_data:
+
+networks:
+  rogue-public:
+    external: true
