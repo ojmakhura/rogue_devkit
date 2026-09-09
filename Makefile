@@ -39,6 +39,12 @@ up_novu: gen_env
 down_novu: gen_env
 	chmod 755 .env && . ./.env && docker stack rm ${STACK_NAME}-novu
 
+up_documenso: gen_env
+	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-documenso.yml ${STACK_NAME}-documenso
+
+down_documenso: gen_env
+	chmod 755 .env && . ./.env && docker stack rm ${STACK_NAME}-documenso
+
 up_service: gen_env
 	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-${service}.yml ${STACK_NAME}-${service}
 
@@ -66,6 +72,8 @@ mount_prep: gen_env
 	mkdir -p ${ROGUE_DATA}/auth && \
 	cp deployment/traefik_passwd ${ROGUE_DATA}/auth/system_passwd && \
 	mkdir -p ${ROGUE_DATA}/keycloak && \
+	mkdir -p ${ROGUE_DATA}/documenso/postgres && \
+	mkdir -p ${ROGUE_DATA}/documenso/redis && \
 	mkdir -p ${ROGUE_DATA}/gitlab/config && \
 	mkdir -p ${ROGUE_DATA}/gitlab/logs && \
 	mkdir -p ${ROGUE_DATA}/gitlab/data && \

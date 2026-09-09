@@ -189,3 +189,14 @@ NEW_RELIC_LICENSE_KEY=
 S3_LOCAL_STACK=http://minio:9000
 S3_BUCKET_NAME=novu
 S3_REGION=us-east-1
+
+# Documenso
+ROGUE_DOCUMENSO_SUBDOMAIN=documenso
+DOCUMENSO_DB=documenso
+DOCUMENSO_SECRET=change-this-documenso-secret
+DOCUMENSO_MAIL_FROM=no-reply@${DOMAIN}
+SMTP_HOST=mail.${DOMAIN}
+SMTP_PORT=587
+SMTP_USER=rogueadmin
+SMTP_PASSWORD=change-this-smtp-password
+SMTP_SECURE=true
