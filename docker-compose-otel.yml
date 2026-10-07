@@ -7,6 +7,7 @@ services:
       rogue-public:
     volumes:
       - ${ROGUE_DATA}/otel/data:/data
+      - ${ROGUE_DATA}/otel/prometheus.yml:/otel-lgtm/prometheus.yaml:ro
     environment:
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_PLUGINS_ENABLE_ALPHA=true
@@ -14,9 +15,9 @@ services:
       - GF_grafanaconThemes=true
       - ENABLE_LOGS_GRAFANA=true
       - GF_FEATURE_TOGGLES_ENABLE=provisioning,kubernetesDashboards
-      - GF_AUTH_ANONYMOUS_ENABLED=false
-      - GF_SECURITY_ADMIN_USER=${OTEL_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${OTEL_ADMIN_PASSWORD}
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      # - GF_SECURITY_ADMIN_USER=${OTEL_ADMIN_USER}
+      # - GF_SECURITY_ADMIN_PASSWORD=${OTEL_ADMIN_PASSWORD}
       - TZ=Africa/Gaborone
     deploy:
       placement:
@@ -56,6 +57,25 @@ services:
         - "traefik.http.routers.otel.service=otel"
 
         - "traefik.http.services.otel.loadbalancer.server.port=4318"
+
+        # =========================================================
+        # PROMETHEUS - HTTP → HTTPS REDIRECT
+        # =========================================================
+        - "traefik.http.routers.otel-prom-http.entrypoints=web"
+        - "traefik.http.routers.otel-prom-http.rule=Host(`${OTEL_PROM_DOMAIN}`)"
+        - "traefik.http.routers.otel-prom-http.middlewares=https-redirect"
+        - "traefik.http.routers.otel-prom-http.service=otel-prom"
+
+        # =========================================================
+        # PROMETHEUS - HTTPS
+        # =========================================================
+        - "traefik.http.routers.otel-prom.entrypoints=websecure"
+        - "traefik.http.routers.otel-prom.rule=Host(`${OTEL_PROM_DOMAIN}`)"
+        - "traefik.http.routers.otel-prom.tls=true"
+        - "traefik.http.routers.otel-prom.tls.certresolver=le"
+        - "traefik.http.routers.otel-prom.service=otel-prom"
+
+        - "traefik.http.services.otel-prom.loadbalancer.server.port=9090"
   
 ###############################################################################
 # Networks
