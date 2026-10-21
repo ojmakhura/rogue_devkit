@@ -1,0 +1,95 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # Garage Server
+  ###############################################################################
+  # After the first deploy the node needs a layout and an access key:
+  #   make garage_init
+  garage:
+    image: dxflrs/garage:v2.1.0
+    hostname: garage
+    volumes:
+     - ${ROGUE_DATA}/garage/meta:/var/lib/garage/meta
+     - ${ROGUE_DATA}/garage/data:/var/lib/garage/data
+    configs:
+      - source: garage-config
+        target: /etc/garage.toml
+    healthcheck:
+      # The image is built from scratch, so use the garage binary itself
+      test: ["CMD", "/garage", "status"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+      GARAGE_METRICS_TOKEN: ${GARAGE_METRICS_TOKEN}
+      RUST_LOG: garage=info
+      TZ: Africa/Gaborone
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          # Pin to the node that holds the data volume
+          - node.labels.rogue_garage == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+
+        - traefik.http.routers.garage-https.rule=Host(`${GARAGE_DOMAIN}`)
+        - traefik.http.routers.garage-https.entrypoints=websecure
+        - traefik.http.routers.garage-https.service=garage
+        - traefik.http.routers.garage-https.tls=true
+        - traefik.http.routers.garage-http.rule=Host(`${GARAGE_DOMAIN}`)
+        - traefik.http.routers.garage-http.entrypoints=web
+        - traefik.http.routers.garage-http.middlewares=https-redirect
+        - traefik.http.routers.garage-http.service=garage
+        - traefik.http.services.garage.loadbalancer.server.port=3900
+
+  ###############################################################################
+  # Garage Web UI (third-party console, Garage has none built in)
+  ###############################################################################
+  garage-webui:
+    image: khairul169/garage-webui:latest
+    hostname: garage-webui
+    configs:
+      - source: garage-config
+        target: /etc/garage.toml
+    environment:
+      CONFIG_PATH: /etc/garage.toml
+      API_BASE_URL: http://garage:3903
+      API_ADMIN_KEY: ${GARAGE_ADMIN_TOKEN}
+      S3_ENDPOINT_URL: http://garage:3900
+      S3_REGION: garage
+      TZ: Africa/Gaborone
+    networks:
+      rogue-public:
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+
+        - traefik.http.routers.garage-console-https.rule=Host(`${GARAGE_CONSOLE_DOMAIN}`)
+        - traefik.http.routers.garage-console-https.entrypoints=websecure
+        - traefik.http.routers.garage-console-https.service=garage-console
+        - traefik.http.routers.garage-console-https.tls=true
+        - traefik.http.routers.garage-console-http.rule=Host(`${GARAGE_CONSOLE_DOMAIN}`)
+        - traefik.http.routers.garage-console-http.entrypoints=web
+        - traefik.http.routers.garage-console-http.middlewares=https-redirect
+        - traefik.http.routers.garage-console-http.service=garage-console
+        - traefik.http.services.garage-console.loadbalancer.server.port=3909
+
+###############################################################################
+# Configs
+###############################################################################
+configs:
+  garage-config:
+    file: ./deployment/garage/garage.toml
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

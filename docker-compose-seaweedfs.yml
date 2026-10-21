@@ -1,0 +1,86 @@
+version: "3.9"
+services:
+  ###############################################################################
+  # SeaweedFS Server (master + volume + filer + S3 gateway in one container)
+  ###############################################################################
+  seaweedfs:
+    image: chrislusf/seaweedfs:latest
+    hostname: seaweedfs
+    volumes:
+     - ${ROGUE_DATA}/seaweedfs:/data
+    # Write the S3 identities from the environment, then start all components.
+    # S3 API on 8333, filer UI on 8888, master UI on 9333.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        mkdir -p /etc/seaweedfs
+        cat > /etc/seaweedfs/s3.json <<EOF
+        {
+          "identities": [
+            {
+              "name": "admin",
+              "credentials": [
+                { "accessKey": "$${SEAWEEDFS_ACCESS_KEY}", "secretKey": "$${SEAWEEDFS_SECRET_KEY}" }
+              ],
+              "actions": ["Admin", "Read", "List", "Tagging", "Write"]
+            }
+          ]
+        }
+        EOF
+        cd /data
+        exec weed server \
+          -dir=/data \
+          -ip=seaweedfs \
+          -ip.bind=0.0.0.0 \
+          -volume.max=0 \
+          -filer \
+          -s3 \
+          -s3.port=8333 \
+          -s3.config=/etc/seaweedfs/s3.json
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:9333/cluster/healthz"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    environment:
+      SEAWEEDFS_ACCESS_KEY: ${SEAWEEDFS_ACCESS_KEY}
+      SEAWEEDFS_SECRET_KEY: ${SEAWEEDFS_SECRET_KEY}
+      TZ: Africa/Gaborone
+    networks:
+      rogue-public:
+    deploy:
+      placement:
+        constraints:
+          # Pin to the node that holds the data volume
+          - node.labels.rogue_seaweedfs == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+
+        - traefik.http.routers.seaweedfs-https.rule=Host(`${SEAWEEDFS_DOMAIN}`)
+        - traefik.http.routers.seaweedfs-https.entrypoints=websecure
+        - traefik.http.routers.seaweedfs-https.service=seaweedfs
+        - traefik.http.routers.seaweedfs-https.tls=true
+        - traefik.http.routers.seaweedfs-http.rule=Host(`${SEAWEEDFS_DOMAIN}`)
+        - traefik.http.routers.seaweedfs-http.entrypoints=web
+        - traefik.http.routers.seaweedfs-http.middlewares=https-redirect
+        - traefik.http.routers.seaweedfs-http.service=seaweedfs
+        - traefik.http.services.seaweedfs.loadbalancer.server.port=8333
+
+        # Filer UI has no authentication of its own
+        - traefik.http.routers.seaweedfs-filer-https.rule=Host(`${SEAWEEDFS_FILER_DOMAIN}`)
+        - traefik.http.routers.seaweedfs-filer-https.entrypoints=websecure
+        - traefik.http.routers.seaweedfs-filer-https.service=seaweedfs-filer
+        - traefik.http.routers.seaweedfs-filer-https.tls=true
+        - traefik.http.routers.seaweedfs-filer-http.rule=Host(`${SEAWEEDFS_FILER_DOMAIN}`)
+        - traefik.http.routers.seaweedfs-filer-http.entrypoints=web
+        - traefik.http.routers.seaweedfs-filer-http.middlewares=https-redirect
+        - traefik.http.routers.seaweedfs-filer-http.service=seaweedfs-filer
+        - traefik.http.services.seaweedfs-filer.loadbalancer.server.port=8888
+
+###############################################################################
+# Networks
+###############################################################################
+networks:
+  rogue-public:
+    external: true

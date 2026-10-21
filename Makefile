@@ -48,6 +48,15 @@ down_documenso: gen_env
 up_service: gen_env
 	chmod 755 .env && . ./.env && docker stack deploy -c docker-compose-${service}.yml ${STACK_NAME}-${service}
 
+# Assign the single-node layout and import the access key after the first garage deploy
+garage_init: gen_env
+	. ./.env && C=$$(docker ps -q -f label=com.docker.swarm.service.name=${STACK_NAME}-garage_garage) && \
+	NODE=$$(docker exec $$C /garage node id -q | cut -d@ -f1) && \
+	docker exec $$C /garage layout assign -z dc1 -c ${GARAGE_CAPACITY} $$NODE && \
+	docker exec $$C /garage layout apply --version 1 && \
+	docker exec $$C /garage key import --yes -n rogue ${GARAGE_ACCESS_KEY} ${GARAGE_SECRET_KEY} && \
+	docker exec $$C /garage key allow --create-bucket ${GARAGE_ACCESS_KEY}
+
 ##
 ## Build docker containers
 ##
@@ -78,6 +87,9 @@ mount_prep: gen_env
 	mkdir -p ${ROGUE_DATA}/gitlab/logs && \
 	mkdir -p ${ROGUE_DATA}/gitlab/data && \
 	mkdir -p ${ROGUE_DATA}/minio && \
+	mkdir -p ${ROGUE_DATA}/seaweedfs && \
+	mkdir -p ${ROGUE_DATA}/garage/meta && \
+	mkdir -p ${ROGUE_DATA}/garage/data && \
 	mkdir -p ${ROGUE_DATA}/certs && \
 	cp deployment/certs/* ${ROGUE_DATA}/certs && \
 	mkdir -p ${ROGUE_DATA}/registry && \
