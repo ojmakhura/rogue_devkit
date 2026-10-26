@@ -1,0 +1,38 @@
+services:
+  nginx:
+    image: nginx:otel
+    networks:
+      rogue-public:
+      rogue-internal:
+        aliases:
+          - seaweedfs
+
+    volumes:
+      - ${ROGUE_DATA}/nginx/nginx-otel.conf:/etc/nginx/nginx.conf:ro
+    deploy:
+      placement:
+        constraints:
+          # Make the traefik service run only on the node with this label
+          # as the node with it has the volume for the certificates
+          - node.labels.rogue_db == true
+      labels:
+        - "traefik.enable=true"
+        - "traefik.docker.network=rogue-public"
+        - "traefik.constraint-label=rogue-public"
+        - "traefik.http.routers.nginx-otel-http.rule=Host(`nginx-otel.roguedev.local`)"
+        - "traefik.http.routers.nginx-otel-http.entrypoints=web"
+        - "traefik.http.routers.nginx-otel-http.middlewares=https-redirect"
+        - "traefik.http.routers.nginx-otel-http.service=nginx-otel"
+        - "traefik.http.routers.nginx-otel-https.entrypoints=websecure"
+        - "traefik.http.routers.nginx-otel-https.rule=Host(`nginx-otel.roguedev.local`)"
+        - "traefik.http.routers.nginx-otel-https.tls=${SSL_SECURE}"
+        - "traefik.http.routers.nginx-otel-https.tls.certresolver=le"
+        - "traefik.http.routers.nginx-otel-https.service=nginx-otel"
+        - "traefik.http.services.nginx-otel.loadbalancer.server.port=80"
+
+networks:
+  rogue-public:
+    external: true
+  rogue-internal:
+    driver: overlay
+    external: true
